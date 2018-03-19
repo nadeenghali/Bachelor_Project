@@ -1,0 +1,19 @@
+﻿<Window x:Class="Microsoft.Samples.Kinect.DiscreteGestureBasics.MyApp"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Microsoft.Samples.Kinect.DiscreteGestureBasics"
+        mc:Ignorable="d"
+        Title="MyApp" Height="300" Width="300">
+    <Grid>
+        <TextBox x:Name="username_txtbx" HorizontalAlignment="Left" Height="23" Margin="81,80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="username_txtbx_TextChanged" GotKeyboardFocus="username_txtbx_GotKeyboardFocus" Text="Username"/>
+        <Button x:Name="register_btn" Content="Register" HorizontalAlignment="Left" Margin="81,123,0,0" VerticalAlignment="Top" Width="75" Click="register_btn_Click"/>
+        <Button x:Name="signIn_btn" Content="Already Registered" HorizontalAlignment="Left" Margin="81,225,0,0" VerticalAlignment="Top" Width="120" Click="signIn_btn_Click"/>
+        <Label x:Name="register_label" Content="Register" HorizontalAlignment="Left" Margin="81,29,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"/>
+        <Label x:Name="enter_label" Content="Enter Gesture" HorizontalAlignment="Left" Margin="84,103,0,0" VerticalAlignment="Top" FontSize="18" FontWeight="Bold"/>
+        <Button x:Name="notRegistered_btn" Content="Not Registered" HorizontalAlignment="Left" Margin="81,200,0,0" VerticalAlignment="Top" Width="120" Click="notRegistered_btn_Click"/>
+        <Button x:Name="start_btn" Content="Start" HorizontalAlignment="Left" Margin="107,157,0,0" VerticalAlignment="Top" Width="75" Click="start_btn_Click"/>
+
+    </Grid>
+</Window>
