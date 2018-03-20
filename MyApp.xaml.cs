@@ -61,6 +61,21 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double backboneLength = 0.0;
         double lowerBackLength = 0.0;
 
+        //angles
+        double minHWEAngleR = 360.0;
+        double meanHWEAngleR = 0.0;
+        double maxHWEAngleR = 0.0;
+        double minHWEAngleL = 360.0;
+        double meanHWEAngleL = 0.0;
+        double maxHWEAngleL = 0.0;
+
+        double minWEShAngleR = 360.0;
+        double meanWEShAngleR = 0.0;
+        double maxWEShAngleR = 0.0;
+        double minWEShAngleL = 360.0;
+        double meanWEShAngleL = 0.0;
+        double maxWEShAngleL = 0.0;
+
         //accumilators
         //right
         double handLengthRAcc = 0.0;
@@ -88,12 +103,17 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double lowerBackLengthAcc = 0.0;
 
         //angles
-        double thumbArmAngle = 0.0;
-        double elbowAngle = 0.0;
+
+        double meanHWEAngleRAcc = 0.0;
+        double meanHWEAngleLAcc = 0.0;
+        double meanWEShAngleRAcc = 0.0;
+        double meanWEShAngleLAcc = 0.0;
 
         //counters and flags
         Boolean uniqueUsername = false;
         int frameCounter = 0;
+        Boolean startClicked = false;
+        int startClickedCounter = 10;
 
         public MyApp()
         {
@@ -111,12 +131,12 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             start_btn.Visibility = Visibility.Hidden;
         }
 
-        public double getDistanceBetweenJoints(double x, double y, double z, double x1, double y1, double z1)
+        public double getDistanceBetweenJoints(CameraSpacePoint a, CameraSpacePoint b)
         {
             double result = 0;
-            double xInter = Math.Pow(x1 - x, 2);
-            double yInter = Math.Pow(y1 - y, 2);
-            double zInter = Math.Pow(z1 - z, 2);
+            double xInter = Math.Pow(b.X - a.X, 2);
+            double yInter = Math.Pow(b.Y - a.Y, 2);
+            double zInter = Math.Pow(b.Z - a.Z, 2);
 
             result = Math.Sqrt(xInter + yInter + zInter);
             return result;
@@ -127,6 +147,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             double result = 0;
             Vector3D v = new Vector3D(vx, vy, vz);
             Vector3D u = new Vector3D(ux, uy, uz);
+
+            result = Vector3D.AngleBetween(v, u);
+            return result;
+        }
+        public double getAngleAtMiddleJoint(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
+        {
+            double result = 0;
+            Vector3D v = new Vector3D(b.X - a.X, b.Y - a.Y, b.Z - a.Z);
+            Vector3D u = new Vector3D(b.X - c.X, b.Y - c.Y, b.Z - c.Z);
 
             result = Vector3D.AngleBetween(v, u);
             return result;
@@ -150,7 +179,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         {
             string message = "";
             string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
-            frameCounter = 0;
+            this.frameCounter = 0;
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -160,7 +189,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                         this.username = username_txtbx.Text;
                         // System.Diagnostics.Debug.WriteLine(this.username);
                         using (SqlCommand command =
-                            new SqlCommand("SELECT * FROM Users WHERE Users.User_Name =\'" + username + "\'", conn))
+                            new SqlCommand("SELECT * FROM Users WHERE Users.User_Name =\'" + this.username + "\'", conn))
                         {
                             uniqueUsername = false;
                             using (SqlDataReader reader = command.ExecuteReader())
@@ -205,10 +234,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                         try
                         {
                             using (SqlCommand command =
-                                new SqlCommand("SELECT * FROM Users WHERE Users.User_Name =\'" + username + "\'", conn))
+                                new SqlCommand("SELECT * FROM Users WHERE Users.User_Name =\'" + this.username + "\'", conn))
                             {
                                 using (SqlDataReader reader = command.ExecuteReader())
                                 {
+                                    reader.Read();
                                     this.userId = Convert.ToInt32(reader["Id"].ToString());
                                 }
                             }
@@ -218,6 +248,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                             {
                                 SqlDataReader reader2 = command2.ExecuteReader();
                                 reader2.Close();
+                            }
+                            using (SqlCommand command =
+                                new SqlCommand("SELECT Top 1 * FROM Sessions WHERE Sessions.User_Id =\'" + this.userId + "\' ORDER BY Sessions.Id DESC", conn))
+                            {
+                                using (SqlDataReader reader = command.ExecuteReader())
+                                {
+                                    reader.Read();
+                                    this.sessionId = Convert.ToInt32(reader["Id"].ToString());
+                                }
                             }
                         }
                         catch (Exception ex3)
@@ -271,14 +310,16 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
 
             // set the BodyFramedArrived event notifier
-            //this.bodyFrameReader.FrameArrived -= this.Reader_BodyFrameArrived;
+            this.frameCounter = 0;
+            startClicked = true;
+            startClickedCounter -= 1;
             this.bodyFrameReader.FrameArrived += this.Reader_BodyFrameArrived;
             //enter_label.Content = this.kinectSensor.BodyFrameSource.BodyCount;
         }
 
         private void Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
-        { 
-
+        {
+            string message = "";
             bool dataReceived = false;
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
             {
@@ -300,202 +341,254 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
             if (dataReceived)
             {
-                // we may have lost/acquired bodies, so update the corresponding gesture detectors
-                if (this.bodies != null)
+                if(startClicked && startClickedCounter >= 0)
                 {
-                    // loop through all bodies
-                    int maxBodies = this.kinectSensor.BodyFrameSource.BodyCount;
-
-                    for (int i = 0; i < maxBodies; ++i)
+                    // we may have lost/acquired bodies, so update the corresponding gesture detectors
+                    if (this.bodies != null)
                     {
-                        Body body = this.bodies[i];
-                        
-                        if (body.IsTracked)//rougly 2 seconds
+                        // loop through all bodies
+                        int maxBodies = this.kinectSensor.BodyFrameSource.BodyCount;
+
+                        for (int i = 0; i < maxBodies; ++i)
                         {
-                            IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
-                            // convert the joint points to depth (display) space
-                            Dictionary<JointType, Point> jointPoints = new Dictionary<JointType, Point>();
-                           
-                            frameCounter += 1;
+                            Body body = this.bodies[i];
 
-                            this.handLengthRAcc += getDistanceBetweenJoints(joints[JointType.WristRight].Position.X,
-                                joints[JointType.WristRight].Position.Y, joints[JointType.WristRight].Position.Z,
-                                joints[JointType.HandTipRight].Position.X, joints[JointType.HandTipRight].Position.Y,
-                                joints[JointType.HandTipRight].Position.Z);
-                            this.foreArmLengthRAcc += getDistanceBetweenJoints(joints[JointType.ElbowRight].Position.X,
-                                joints[JointType.ElbowRight].Position.Y, joints[JointType.ElbowRight].Position.Z,
-                                joints[JointType.WristRight].Position.X, joints[JointType.WristRight].Position.Y,
-                                joints[JointType.WristRight].Position.Z);
-                            this.upperArmLengthRAcc += getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position.X,
-                                joints[JointType.ShoulderRight].Position.Y, joints[JointType.ShoulderRight].Position.Z,
-                                joints[JointType.ElbowRight].Position.X, joints[JointType.ElbowRight].Position.Y,
-                                joints[JointType.ElbowRight].Position.Z);
-                            this.shoulderLengthRAcc += getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position.X,
-                                joints[JointType.ShoulderRight].Position.Y, joints[JointType.ShoulderRight].Position.Z,
-                                joints[JointType.SpineShoulder].Position.X, joints[JointType.SpineShoulder].Position.Y,
-                                joints[JointType.SpineShoulder].Position.Z);
-                            this.hipLengthRAcc += getDistanceBetweenJoints(joints[JointType.HipRight].Position.X,
-                                joints[JointType.HipRight].Position.Y, joints[JointType.HipRight].Position.Z,
-                                joints[JointType.SpineBase].Position.X, joints[JointType.SpineBase].Position.Y,
-                                joints[JointType.SpineBase].Position.Z);
-                            this.upperLegLengthRAcc += getDistanceBetweenJoints(joints[JointType.HipRight].Position.X,
-                                joints[JointType.HipRight].Position.Y, joints[JointType.HipRight].Position.Z,
-                                joints[JointType.KneeRight].Position.X, joints[JointType.KneeRight].Position.Y,
-                                joints[JointType.KneeRight].Position.Z);
-                            this.shinLengthRAcc += getDistanceBetweenJoints(joints[JointType.AnkleRight].Position.X,
-                                joints[JointType.AnkleRight].Position.Y, joints[JointType.AnkleRight].Position.Z,
-                                joints[JointType.KneeRight].Position.X, joints[JointType.KneeRight].Position.Y,
-                                joints[JointType.KneeRight].Position.Z);
-                            this.footLengthRAcc += getDistanceBetweenJoints(joints[JointType.AnkleRight].Position.X,
-                                joints[JointType.AnkleRight].Position.Y, joints[JointType.AnkleRight].Position.Z,
-                                joints[JointType.FootRight].Position.X, joints[JointType.FootRight].Position.Y,
-                                joints[JointType.FootRight].Position.Z);
-
-
-                            this.handLengthLAcc += getDistanceBetweenJoints(joints[JointType.WristLeft].Position.X,
-                                joints[JointType.WristLeft].Position.Y, joints[JointType.WristLeft].Position.Z,
-                                joints[JointType.HandTipLeft].Position.X, joints[JointType.HandTipLeft].Position.Y,
-                                joints[JointType.HandTipLeft].Position.Z);
-                            this.foreArmLengthLAcc += getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position.X,
-                                joints[JointType.ElbowLeft].Position.Y, joints[JointType.ElbowLeft].Position.Z,
-                                joints[JointType.WristLeft].Position.X, joints[JointType.WristLeft].Position.Y,
-                                joints[JointType.WristLeft].Position.Z);
-                            this.upperArmLengthLAcc += getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position.X,
-                                joints[JointType.ShoulderLeft].Position.Y, joints[JointType.ShoulderLeft].Position.Z,
-                                joints[JointType.ElbowLeft].Position.X, joints[JointType.ElbowLeft].Position.Y,
-                                joints[JointType.ElbowLeft].Position.Z);
-                            this.shoulderLengthLAcc += getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position.X,
-                                joints[JointType.ShoulderLeft].Position.Y, joints[JointType.ShoulderLeft].Position.Z,
-                                joints[JointType.SpineShoulder].Position.X, joints[JointType.SpineShoulder].Position.Y,
-                                joints[JointType.SpineShoulder].Position.Z);
-                            this.hipLengthLAcc += getDistanceBetweenJoints(joints[JointType.HipLeft].Position.X,
-                                joints[JointType.HipLeft].Position.Y, joints[JointType.HipLeft].Position.Z,
-                                joints[JointType.SpineBase].Position.X, joints[JointType.SpineBase].Position.Y,
-                                joints[JointType.SpineBase].Position.Z);
-                            this.upperLegLengthLAcc += getDistanceBetweenJoints(joints[JointType.HipLeft].Position.X,
-                                joints[JointType.HipLeft].Position.Y, joints[JointType.HipLeft].Position.Z,
-                                joints[JointType.KneeLeft].Position.X, joints[JointType.KneeLeft].Position.Y,
-                                joints[JointType.KneeLeft].Position.Z);
-                            this.shinLengthLAcc += getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position.X,
-                                joints[JointType.AnkleLeft].Position.Y, joints[JointType.AnkleLeft].Position.Z,
-                                joints[JointType.KneeLeft].Position.X, joints[JointType.KneeLeft].Position.Y,
-                                joints[JointType.KneeLeft].Position.Z);
-                            this.footLengthLAcc += getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position.X,
-                                joints[JointType.AnkleLeft].Position.Y, joints[JointType.AnkleLeft].Position.Z,
-                                joints[JointType.FootLeft].Position.X, joints[JointType.FootLeft].Position.Y,
-                                joints[JointType.FootLeft].Position.Z);
-
-                            this.neckLengthAcc += getDistanceBetweenJoints(joints[JointType.Head].Position.X,
-                                joints[JointType.Head].Position.Y, joints[JointType.Head].Position.Z,
-                                joints[JointType.SpineShoulder].Position.X, joints[JointType.SpineShoulder].Position.Y,
-                                joints[JointType.SpineShoulder].Position.Z);
-                            this.backboneLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position.X,
-                                joints[JointType.SpineMid].Position.Y, joints[JointType.SpineMid].Position.Z,
-                                joints[JointType.SpineShoulder].Position.X, joints[JointType.SpineShoulder].Position.Y,
-                                joints[JointType.SpineShoulder].Position.Z);
-                            this.lowerBackLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position.X,
-                                joints[JointType.SpineMid].Position.Y, joints[JointType.SpineMid].Position.Z,
-                                joints[JointType.SpineBase].Position.X, joints[JointType.SpineBase].Position.Y,
-                                joints[JointType.SpineBase].Position.Z);
-
-                            if (frameCounter == 150)
+                            if (body.IsTracked)
                             {
-                                this.handLengthR = handLengthRAcc / 150;
-                                this.upperArmLengthR = upperArmLengthRAcc / 150;
-                                this.foreArmLengthR = foreArmLengthRAcc / 150;
-                                this.shoulderLengthR = shoulderLengthRAcc / 150;
-                                this.hipLengthR = hipLengthRAcc / 150;
-                                this.upperLegLengthR = upperLegLengthRAcc / 150;
-                                this.shinLengthR = shinLengthRAcc / 150;
-                                this.footLengthR = footLengthRAcc / 150;
 
-                                this.handLengthL = handLengthLAcc / 150;
-                                this.upperArmLengthL = upperArmLengthLAcc / 150;
-                                this.foreArmLengthL = foreArmLengthLAcc / 150;
-                                this.shoulderLengthL = shoulderLengthLAcc / 150;
-                                this.hipLengthL = hipLengthLAcc / 150;
-                                this.upperLegLengthL = upperLegLengthLAcc / 150;
-                                this.shinLengthL = shinLengthLAcc / 150;
-                                this.footLengthL = footLengthLAcc / 150;
+                                System.Diagnostics.Debug.WriteLine("body frame triggered");
+                                IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
+                                // convert the joint points to depth (display) space
+                                Dictionary<JointType, Point> jointPoints = new Dictionary<JointType, Point>();
 
-                                this.neckLength = neckLengthAcc / 150;
-                                this.backboneLength = backboneLengthAcc / 150;
-                                this.lowerBackLength = lowerBackLengthAcc / 150;
+                                frameCounter += 1;
 
-                                handLengthRAcc = 0.0;
-                                upperArmLengthRAcc = 0.0;
-                                foreArmLengthRAcc = 0.0;
-                                shoulderLengthRAcc = 0.0;
-                                hipLengthRAcc = 0.0;
-                                upperLegLengthRAcc = 0.0;
-                                shinLengthRAcc = 0.0;
-                                footLengthRAcc = 0.0;
+                                this.handLengthRAcc += getDistanceBetweenJoints(joints[JointType.WristRight].Position,
+                                    joints[JointType.HandTipRight].Position);
+                                this.foreArmLengthRAcc += getDistanceBetweenJoints(joints[JointType.ElbowRight].Position,
+                                    joints[JointType.WristRight].Position);
+                                this.upperArmLengthRAcc += getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
+                                    joints[JointType.ElbowRight].Position);
+                                this.shoulderLengthRAcc += getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
+                                    joints[JointType.SpineShoulder].Position);
+                                this.hipLengthRAcc += getDistanceBetweenJoints(joints[JointType.HipRight].Position,
+                                    joints[JointType.SpineBase].Position);
+                                this.upperLegLengthRAcc += getDistanceBetweenJoints(joints[JointType.HipRight].Position,
+                                    joints[JointType.KneeRight].Position);
+                                this.shinLengthRAcc += getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
+                                    joints[JointType.KneeRight].Position);
+                                this.footLengthRAcc += getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
+                                    joints[JointType.FootRight].Position);
 
-                                handLengthLAcc = 0.0;
-                                upperArmLengthLAcc = 0.0;
-                                foreArmLengthLAcc = 0.0;
-                                shoulderLengthLAcc = 0.0;
-                                hipLengthLAcc = 0.0;
-                                upperLegLengthLAcc = 0.0;
-                                shinLengthLAcc = 0.0;
-                                footLengthLAcc = 0.0;
 
-                                neckLengthAcc = 0.0;
-                                backboneLengthAcc = 0.0;
-                                lowerBackLengthAcc = 0.0;
+                                this.handLengthLAcc += getDistanceBetweenJoints(joints[JointType.WristLeft].Position,
+                                    joints[JointType.HandTipLeft].Position);
+                                this.foreArmLengthLAcc += getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position,
+                                    joints[JointType.WristLeft].Position);
+                                this.upperArmLengthLAcc += getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
+                                    joints[JointType.ElbowLeft].Position);
+                                this.shoulderLengthLAcc += getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
+                                    joints[JointType.SpineShoulder].Position);
+                                this.hipLengthLAcc += getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
+                                    joints[JointType.SpineBase].Position);
+                                this.upperLegLengthLAcc += getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
+                                    joints[JointType.KneeLeft].Position);
+                                this.shinLengthLAcc += getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
+                                    joints[JointType.KneeLeft].Position);
+                                this.footLengthLAcc += getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
+                                    joints[JointType.FootLeft].Position);
 
-                                string message = "";
-                                string connectionString = null;
-                                connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
-                                try
+                                this.neckLengthAcc += getDistanceBetweenJoints(joints[JointType.Head].Position,
+                                    joints[JointType.SpineShoulder].Position);
+                                this.backboneLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
+                                    joints[JointType.SpineShoulder].Position);
+                                this.lowerBackLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
+                                    joints[JointType.SpineBase].Position);
+
+                                double HWEAngleL = getAngleAtMiddleJoint
+                                    (joints[JointType.ElbowLeft].Position,
+                                    joints[JointType.WristLeft].Position,
+                                    joints[JointType.ThumbLeft].Position);
+
+
+                                double WEShAngleL = getAngleAtMiddleJoint
+                                    (joints[JointType.WristLeft].Position,
+                                    joints[JointType.ElbowLeft].Position,
+                                    joints[JointType.ShoulderLeft].Position);
+
+                                double HWEAngleR = getAngleAtMiddleJoint
+                                    (joints[JointType.ElbowRight].Position,
+                                    joints[JointType.WristRight].Position,
+                                    joints[JointType.ThumbRight].Position);
+
+                                double WEShAngleR = getAngleAtMiddleJoint
+                                    (joints[JointType.WristRight].Position,
+                                    joints[JointType.ElbowRight].Position,
+                                    joints[JointType.ShoulderRight].Position);
+
+                                this.meanHWEAngleLAcc += HWEAngleL;
+                                this.meanWEShAngleLAcc += WEShAngleL;
+
+                                this.meanHWEAngleRAcc += HWEAngleR;
+                                this.meanWEShAngleRAcc += WEShAngleR;
+
+
+                                if (this.minHWEAngleL > HWEAngleL)
                                 {
+                                    this.minHWEAngleL = HWEAngleL;
+                                }
+                                if (this.maxHWEAngleL < HWEAngleL)
+                                {
+                                    this.maxHWEAngleL = HWEAngleL;
+                                }
 
-                                    using (SqlConnection conn = new SqlConnection(connectionString))
+                                if (this.minHWEAngleR > HWEAngleR)
+                                {
+                                    this.minHWEAngleR = HWEAngleR;
+                                }
+                                if (this.maxHWEAngleR < HWEAngleR)
+                                {
+                                    this.maxHWEAngleR = HWEAngleR;
+                                }
+
+                                if (this.minWEShAngleL > HWEAngleL)
+                                {
+                                    this.minWEShAngleL = WEShAngleL;
+                                }
+                                if (this.maxWEShAngleL < WEShAngleL)
+                                {
+                                    this.maxWEShAngleL = WEShAngleL;
+                                }
+
+                                if (this.minWEShAngleR > WEShAngleR)
+                                {
+                                    this.minWEShAngleR = WEShAngleR;
+                                }
+                                if (this.maxWEShAngleR < WEShAngleR)
+                                {
+                                    this.maxWEShAngleR = WEShAngleR;
+                                }
+
+
+                                if (frameCounter == 150)
+                                {
+                                    this.handLengthR = handLengthRAcc / 150;
+                                    this.upperArmLengthR = upperArmLengthRAcc / 150;
+                                    this.foreArmLengthR = foreArmLengthRAcc / 150;
+                                    this.shoulderLengthR = shoulderLengthRAcc / 150;
+                                    this.hipLengthR = hipLengthRAcc / 150;
+                                    this.upperLegLengthR = upperLegLengthRAcc / 150;
+                                    this.shinLengthR = shinLengthRAcc / 150;
+                                    this.footLengthR = footLengthRAcc / 150;
+
+                                    this.handLengthL = handLengthLAcc / 150;
+                                    this.upperArmLengthL = upperArmLengthLAcc / 150;
+                                    this.foreArmLengthL = foreArmLengthLAcc / 150;
+                                    this.shoulderLengthL = shoulderLengthLAcc / 150;
+                                    this.hipLengthL = hipLengthLAcc / 150;
+                                    this.upperLegLengthL = upperLegLengthLAcc / 150;
+                                    this.shinLengthL = shinLengthLAcc / 150;
+                                    this.footLengthL = footLengthLAcc / 150;
+
+                                    this.neckLength = neckLengthAcc / 150;
+                                    this.backboneLength = backboneLengthAcc / 150;
+                                    this.lowerBackLength = lowerBackLengthAcc / 150;
+
+                                    this.meanHWEAngleL = meanHWEAngleLAcc / 150;
+                                    this.meanHWEAngleR = meanHWEAngleRAcc / 150;
+                                    this.meanWEShAngleL = meanWEShAngleLAcc / 150;
+                                    this.meanWEShAngleR = meanWEShAngleRAcc / 150;
+
+
+                                    this.handLengthRAcc = 0.0;
+                                    this.upperArmLengthRAcc = 0.0;
+                                    this.foreArmLengthRAcc = 0.0;
+                                    this.shoulderLengthRAcc = 0.0;
+                                    this.hipLengthRAcc = 0.0;
+                                    this.upperLegLengthRAcc = 0.0;
+                                    this.shinLengthRAcc = 0.0;
+                                    this.footLengthRAcc = 0.0;
+
+                                    this.handLengthLAcc = 0.0;
+                                    this.upperArmLengthLAcc = 0.0;
+                                    this.foreArmLengthLAcc = 0.0;
+                                    this.shoulderLengthLAcc = 0.0;
+                                    this.hipLengthLAcc = 0.0;
+                                    this.upperLegLengthLAcc = 0.0;
+                                    this.shinLengthLAcc = 0.0;
+                                    this.footLengthLAcc = 0.0;
+
+                                    this.neckLengthAcc = 0.0;
+                                    this.backboneLengthAcc = 0.0;
+                                    this.lowerBackLengthAcc = 0.0;
+                                    this.meanHWEAngleLAcc = 0.0;
+                                    this.meanHWEAngleRAcc = 0.0;
+                                    this.meanWEShAngleLAcc = 0.0;
+                                    this.meanWEShAngleRAcc = 0.0;
+
+                                    string connectionString = null;
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
+                                    try
                                     {
-                                        conn.Open();
 
-                                        this.username = username_txtbx.Text;
-                                        // System.Diagnostics.Debug.WriteLine(this.username);
-                                        using (SqlCommand command = new SqlCommand
-                                                    ("SELECT Id FROM Users WHERE Users.User_Name =\'" + this.username + "\'", conn))
+                                        using (SqlConnection conn = new SqlConnection(connectionString))
                                         {
-                                            uniqueUsername = false;
-                                            using (SqlDataReader reader = command.ExecuteReader())
+                                            conn.Open();
+
+                                            this.username = username_txtbx.Text;
+                                            // System.Diagnostics.Debug.WriteLine(this.username);
+                                            using (SqlCommand command = new SqlCommand
+                                                        ("SELECT Id FROM Users WHERE Users.User_Name =\'" + this.username + "\'", conn))
                                             {
-                                                if (reader.Read() && !this.username.Equals(""))
+                                                uniqueUsername = false;
+                                                using (SqlDataReader reader = command.ExecuteReader())
                                                 {
+                                                    if (reader.Read() && !this.username.Equals(""))
+                                                    {
                                                         this.userId = Convert.ToInt32(reader["Id"].ToString());
                                                         uniqueUsername = true;
                                                         message = "Valid username \n";
+                                                    }
+                                                    else
+                                                    {
+                                                        this.userId = 0;
+                                                    }
+                                                    reader.Close();
                                                 }
-                                                else
-                                                {
-                                                    this.userId = 0;
-                                                }
-                                                reader.Close();
-                                            }
-                                        }
-                                       
-                                        if (uniqueUsername && !this.username.Equals("")) //register
-                                        {
-                                            using (SqlCommand command = new SqlCommand
-                                                    ("INSERT INTO Extracted_Kinect_Data VALUES ( 1,'" 
-                                                    + this.userId + "', 100 , 1, '" + 
-                                                    this.handLengthR * 100 +"','"+ this.upperArmLengthR * 100 +
-                                                    "','" + this.foreArmLengthR * 100 + "','" + this.shoulderLengthR * 100 +
-                                                    "','" + this.handLengthL * 100 + "','" + this.upperArmLengthL * 100 + 
-                                                    "','" + this.foreArmLengthL * 100 + "','" + this.shoulderLengthL * 100 + 
-                                                    "','" + this.neckLength * 100 + "','" + this.backboneLength * 100 +
-                                                    "','" + this.lowerBackLength * 100 + "','" + this.hipLengthR * 100 + 
-                                                    "','" + this.upperLegLengthR * 100 + "','" + this.shinLengthR * 100 + 
-                                                    "','" + this.footLengthR * 100 + "','" + this.hipLengthL * 100 +
-                                                    "','" + this.upperLegLengthL * 100 + "','" + this.shinLengthL * 100 +
-                                                    "','" + this.footLengthL * 100 + "')", conn))
-                                            {
-                                                SqlDataReader reader = command.ExecuteReader();
-                                                reader.Close();
                                             }
 
+                                            if (uniqueUsername && !this.username.Equals("")) //register
+                                            {
+                                                using (SqlCommand command = new SqlCommand
+                                                        ("INSERT INTO Extracted_Kinect_Data VALUES ( 1,'"
+                                                        + this.userId + "','" + this.sessionId + "','" +
+                                                        this.handLengthR * 100 + "','" + this.upperArmLengthR * 100 +
+                                                        "','" + this.foreArmLengthR * 100 + "','" + this.shoulderLengthR * 100 +
+                                                        "','" + this.handLengthL * 100 + "','" + this.upperArmLengthL * 100 +
+                                                        "','" + this.foreArmLengthL * 100 + "','" + this.shoulderLengthL * 100 +
+                                                        "','" + this.neckLength * 100 + "','" + this.backboneLength * 100 +
+                                                        "','" + this.lowerBackLength * 100 + "','" + this.hipLengthR * 100 +
+                                                        "','" + this.upperLegLengthR * 100 + "','" + this.shinLengthR * 100 +
+                                                        "','" + this.footLengthR * 100 + "','" + this.hipLengthL * 100 +
+                                                        "','" + this.upperLegLengthL * 100 + "','" + this.shinLengthL * 100 +
+                                                        "','" + this.footLengthL * 100 + "','" + this.minHWEAngleR +
+                                                        "','" + this.meanHWEAngleR + "','" + this.maxHWEAngleR +
+                                                        "','" + this.minWEShAngleR + "','" + this.meanWEShAngleR +
+                                                        "','" + this.maxWEShAngleR + "','" + this.minHWEAngleL +
+                                                        "','" + this.meanHWEAngleL + "','" + this.maxHWEAngleL +
+                                                        "','" + this.minWEShAngleL + "','" + this.meanWEShAngleL +
+                                                        "','" + this.maxWEShAngleL + "')", conn))
+                                                {
+                                                    SqlDataReader reader = command.ExecuteReader();
+                                                    reader.Close();
+                                                }
+
+                                            }
+                                            conn.Close();
+                                        }
+
+                                        if (startClickedCounter == 0)
+                                        {
                                             message = "Registered Successfully! \n";
                                             this.username = "";
                                             this.uniqueUsername = false;
@@ -505,43 +598,25 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                             signIn_btn.Visibility = Visibility.Visible;
                                             enter_label.Visibility = Visibility.Hidden;
                                             start_btn.Visibility = Visibility.Hidden;
-
+                                            MessageBox.Show(message);
+                                            this.startClickedCounter = 10;
+                                            this.frameCounter = 0;
                                         }
-                                        else if (!uniqueUsername && this.username.Equals("")) //sign in
-                                        {
-                                            using (SqlCommand command = new SqlCommand
-                                                    ("SELECT Extracted_Kinect_Data.User_Id FROM Extracted_Kinect_Data WHERE (Extracted_Kinect_Data.Fore_Arm_Length_R BETWEEN "
-                                                    + ((this.foreArmLengthR * 100) + 4.0) + " AND " + ((this.foreArmLengthR * 100) - 4.0) +
-                                                    ") AND (Extracted_Kinect_Data.Hand_Length_R BETWEEN" + ((this.handLengthR * 100) + 4.0) + 
-                                                    " AND " + ((this.handLengthR * 100) - 4.0) + ")"
-                                                    , conn))
-                                            {
-                                                using (SqlDataReader reader = command.ExecuteReader())
-                                                {
-                                                    int queryRes = Convert.ToInt32(reader["User_Id"].ToString());
-                                                    if (!reader.Read())
-                                                    {
-                                                        MessageBox.Show("No match found!");
-                                                    }
-                                                    else
-                                                    {
-                                                        MessageBox.Show(""+queryRes);
-                                                    }
-                                                    reader.Close();
-                                                    return;
-                                                }
-                                            }
-                                        }
-                                        conn.Close();
                                     }
+                                    catch (Exception ex)
+                                    {
+                                        MessageBox.Show("Oops an error has occured!\n" + ex.ToString());
+                                        return;
+                                    }
+                                   
+                                    startClicked = false;
+                                    if (this.startClickedCounter > 0)
+                                    {
+                                        start_btn.Visibility = Visibility.Visible;
+                                    }
+                                    this.bodyFrameReader.FrameArrived -= this.Reader_BodyFrameArrived;
+                                    break;
                                 }
-                                catch (Exception ex)
-                                {
-                                    MessageBox.Show("Oops an error has occured!\n" + ex.ToString());
-                                    return;
-                                }
-                                MessageBox.Show(message);
-                                break;
                             }
                         }
                     }
