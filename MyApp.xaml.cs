@@ -310,7 +310,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
 
             // set the BodyFramedArrived event notifier
-            //this.bodyFrameReader.FrameArrived -= this.Reader_BodyFrameArrived;
+            this.frameCounter = 0;
             startClicked = true;
             startClickedCounter -= 1;
             this.bodyFrameReader.FrameArrived += this.Reader_BodyFrameArrived;
@@ -318,8 +318,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         }
 
         private void Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
-        { 
-
+        {
+            string message = "";
             bool dataReceived = false;
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
             {
@@ -341,7 +341,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
             if (dataReceived)
             {
-                if(startClicked && startClickedCounter > 0)
+                if(startClicked && startClickedCounter >= 0)
                 {
                     // we may have lost/acquired bodies, so update the corresponding gesture detectors
                     if (this.bodies != null)
@@ -355,6 +355,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
                             if (body.IsTracked)
                             {
+
+                                System.Diagnostics.Debug.WriteLine("body frame triggered");
                                 IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
                                 // convert the joint points to depth (display) space
                                 Dictionary<JointType, Point> jointPoints = new Dictionary<JointType, Point>();
@@ -524,7 +526,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.meanWEShAngleLAcc = 0.0;
                                     this.meanWEShAngleRAcc = 0.0;
 
-                                    string message = "";
                                     string connectionString = null;
                                     connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
                                     try
@@ -582,18 +583,24 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                     reader.Close();
                                                 }
 
-                                                message = "Registered Successfully! \n";
-                                                this.username = "";
-                                                this.uniqueUsername = false;
-                                                register_btn.Visibility = Visibility.Visible;
-                                                username_txtbx.Visibility = Visibility.Visible;
-                                                register_label.Visibility = Visibility.Visible;
-                                                signIn_btn.Visibility = Visibility.Visible;
-                                                enter_label.Visibility = Visibility.Hidden;
-                                                start_btn.Visibility = Visibility.Hidden;
-
                                             }
                                             conn.Close();
+                                        }
+
+                                        if (startClickedCounter == 0)
+                                        {
+                                            message = "Registered Successfully! \n";
+                                            this.username = "";
+                                            this.uniqueUsername = false;
+                                            register_btn.Visibility = Visibility.Visible;
+                                            username_txtbx.Visibility = Visibility.Visible;
+                                            register_label.Visibility = Visibility.Visible;
+                                            signIn_btn.Visibility = Visibility.Visible;
+                                            enter_label.Visibility = Visibility.Hidden;
+                                            start_btn.Visibility = Visibility.Hidden;
+                                            MessageBox.Show(message);
+                                            this.startClickedCounter = 10;
+                                            this.frameCounter = 0;
                                         }
                                     }
                                     catch (Exception ex)
@@ -601,9 +608,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                         MessageBox.Show("Oops an error has occured!\n" + ex.ToString());
                                         return;
                                     }
-                                    MessageBox.Show(message);
+                                   
                                     startClicked = false;
-                                    start_btn.Visibility = Visibility.Visible;
+                                    if (this.startClickedCounter > 0)
+                                    {
+                                        start_btn.Visibility = Visibility.Visible;
+                                    }
+                                    this.bodyFrameReader.FrameArrived -= this.Reader_BodyFrameArrived;
                                     break;
                                 }
                             }
