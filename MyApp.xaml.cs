@@ -29,7 +29,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private BodyFrameReader bodyFrameReader = null;
         private string statusText = null;
         private KinectBodyView kinectBodyView = null;
-        private List<GestureDetector> gestureDetectorList = null;
 
         //DB data
         int userId;
@@ -76,6 +75,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double meanWEShAngleL = 0.0;
         double maxWEShAngleL = 0.0;
 
+        //relative distances
+        double wristRelativeSpineShoulderR = 0.0;
+        double elbowRelativeSpineShoulderR = 0.0;
+
+        double wristRelativeSpineShoulderL = 0.0;
+        double elbowRelativeSpineShoulderL = 0.0;
+
         //accumilators
         //right
         double handLengthRAcc = 0.0;
@@ -109,11 +115,61 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double meanWEShAngleRAcc = 0.0;
         double meanWEShAngleLAcc = 0.0;
 
+        //relative distances
+        double wristRelativeSpineShoulderRAcc = 0.0;
+        double elbowRelativeSpineShoulderRAcc = 0.0;
+
+        double wristRelativeSpineShoulderLAcc = 0.0;
+        double elbowRelativeSpineShoulderLAcc = 0.0;
+
+
+        //user accumilatiors
+
+        double handLengthRUserAcc;
+        double upperArmLengthRUserAcc;
+        double foreArmLengthRUserAcc;
+        double shoulderLengthRUserAcc;
+        double handLengthLUserAcc;
+        double upperArmLengthLUserAcc;
+        double foreArmLengthLUserAcc;
+        double shoulderLengthLUserAcc;
+        double neckLengthUserAcc;
+        double backboneLengthUserAcc;
+        double lowerBackLengthUserAcc;
+        double hipLengthRUserAcc;
+        double upperLegLengthRUserAcc;
+        double shinLengthRUserAcc;
+        double footLengthRUserAcc;
+        double hipLengthLUserAcc;
+        double upperLegLengthLUserAcc;
+        double shinLengthLUserAcc;
+        double footLengthLUserAcc;
+        double minHWEAngleRUserAcc;
+        double meanHWEAngleRUserAcc;
+        double maxHWEAngleRUserAcc;
+
+        double minWEShAngleRUserAcc;
+        double meanWEShAngleRUserAcc;
+        double maxWEShAngleRUserAcc;
+
+        double meanHWEAngleLUserAcc;
+        double maxHWEAngleLUserAcc;
+        double minHWEAngleLUserAcc;
+
+        double minWEShAngleLUserAcc;
+        double meanWEShAngleLUserAcc;
+        double maxWEShAngleLUserAcc;
+
+        double wristRelativeSpineShoulderRUserAcc;
+        double elbowRelativeSpineShoulderRUserAcc;
+        double wristRelativeSpineShoulderLUserAcc;
+        double elbowRelativeSpineShoulderLUserAcc;
+
         //counters and flags
         Boolean uniqueUsername = false;
         int frameCounter = 0;
         Boolean startClicked = false;
-        int startClickedCounter = 10;
+        int startClickedCounter = 2;
 
         public MyApp()
         {
@@ -313,6 +369,94 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.frameCounter = 0;
             startClicked = true;
             startClickedCounter -= 1;
+
+            this.handLengthR = 0.0;
+            this.upperArmLengthR = 0.0;
+            this.foreArmLengthR = 0.0;
+            this.shoulderLengthR = 0.0;
+            this.hipLengthR = 0.0;
+            this.upperLegLengthR = 0.0;
+            this.shinLengthR = 0.0;
+            this.footLengthR = 0.0;
+
+            //left
+            this.handLengthL = 0.0;
+            this.upperArmLengthL = 0.0;
+            this.foreArmLengthL = 0.0;
+            this.shoulderLengthL = 0.0;
+            this.hipLengthL = 0.0;
+            this.upperLegLengthL = 0.0;
+            this.shinLengthL = 0.0;
+            this.footLengthL = 0.0;
+
+            //general
+            this.neckLength = 0.0;
+            this.backboneLength = 0.0;
+            this.lowerBackLength = 0.0;
+
+            //angles
+            this.minHWEAngleR = 360.0;
+            this.meanHWEAngleR = 0.0;
+            this.maxHWEAngleR = 0.0;
+            this.minHWEAngleL = 360.0;
+            this.meanHWEAngleL = 0.0;
+            this.maxHWEAngleL = 0.0;
+
+            this.minWEShAngleR = 360.0;
+            this.meanWEShAngleR = 0.0;
+            this.maxWEShAngleR = 0.0;
+            this.minWEShAngleL = 360.0;
+            this.meanWEShAngleL = 0.0;
+            this.maxWEShAngleL = 0.0;
+
+            //relative distances
+            this.wristRelativeSpineShoulderR = 0.0;
+            this.elbowRelativeSpineShoulderR = 0.0;
+
+            this.wristRelativeSpineShoulderL = 0.0;
+            this.elbowRelativeSpineShoulderL = 0.0;
+
+            //accumilators
+            //right
+            this.handLengthRAcc = 0.0;
+            this.upperArmLengthRAcc = 0.0;
+            this.foreArmLengthRAcc = 0.0;
+            this.shoulderLengthRAcc = 0.0;
+            this.hipLengthRAcc = 0.0;
+            this.upperLegLengthRAcc = 0.0;
+            this.shinLengthRAcc = 0.0;
+            this.footLengthRAcc = 0.0;
+
+            //left
+            this.handLengthLAcc = 0.0;
+            this.upperArmLengthLAcc = 0.0;
+            this.foreArmLengthLAcc = 0.0;
+            this.shoulderLengthLAcc = 0.0;
+            this.hipLengthLAcc = 0.0;
+            this.upperLegLengthLAcc = 0.0;
+            this.shinLengthLAcc = 0.0;
+            this.footLengthLAcc = 0.0;
+
+            //general
+            this.neckLengthAcc = 0.0;
+            this.backboneLengthAcc = 0.0;
+            this.lowerBackLengthAcc = 0.0;
+
+            //angles
+
+            this.meanHWEAngleRAcc = 0.0;
+            this.meanHWEAngleLAcc = 0.0;
+            this.meanWEShAngleRAcc = 0.0;
+            this.meanWEShAngleLAcc = 0.0;
+
+            //relative distances
+            this.wristRelativeSpineShoulderRAcc = 0.0;
+            this.elbowRelativeSpineShoulderRAcc = 0.0;
+
+            this.wristRelativeSpineShoulderLAcc = 0.0;
+            this.elbowRelativeSpineShoulderLAcc = 0.0;
+
+
             this.bodyFrameReader.FrameArrived += this.Reader_BodyFrameArrived;
             //enter_label.Content = this.kinectSensor.BodyFrameSource.BodyCount;
         }
@@ -404,6 +548,16 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     joints[JointType.SpineShoulder].Position);
                                 this.lowerBackLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
                                     joints[JointType.SpineBase].Position);
+
+                                this.wristRelativeSpineShoulderRAcc += getDistanceBetweenJoints(joints[JointType.WristRight].Position,
+                                    joints[JointType.SpineShoulder].Position);
+                                this.elbowRelativeSpineShoulderRAcc += getDistanceBetweenJoints(joints[JointType.ElbowRight].Position,
+                                    joints[JointType.SpineShoulder].Position);
+
+                                this.wristRelativeSpineShoulderLAcc += getDistanceBetweenJoints(joints[JointType.WristLeft].Position,
+                                    joints[JointType.SpineShoulder].Position);
+                                this.elbowRelativeSpineShoulderLAcc += getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position,
+                                    joints[JointType.SpineShoulder].Position);
 
                                 double HWEAngleL = getAngleAtMiddleJoint
                                     (joints[JointType.ElbowLeft].Position,
@@ -499,6 +653,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.meanWEShAngleL = meanWEShAngleLAcc / 150;
                                     this.meanWEShAngleR = meanWEShAngleRAcc / 150;
 
+                                    this.elbowRelativeSpineShoulderR = elbowRelativeSpineShoulderRAcc / 150;
+                                    this.wristRelativeSpineShoulderR = wristRelativeSpineShoulderRAcc / 150;
+                                    this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / 150;
+                                    this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / 150;
 
                                     this.handLengthRAcc = 0.0;
                                     this.upperArmLengthRAcc = 0.0;
@@ -525,6 +683,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.meanHWEAngleRAcc = 0.0;
                                     this.meanWEShAngleLAcc = 0.0;
                                     this.meanWEShAngleRAcc = 0.0;
+
+                                    this.wristRelativeSpineShoulderRAcc = 0.0;
+                                    this.elbowRelativeSpineShoulderRAcc = 0.0;
+                                    this.wristRelativeSpineShoulderLAcc = 0.0;
+                                    this.elbowRelativeSpineShoulderLAcc = 0.0;
 
                                     string connectionString = null;
                                     connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
@@ -556,8 +719,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                     reader.Close();
                                                 }
                                             }
-
-                                            if (uniqueUsername && !this.username.Equals("")) //register
+                                            //register
+                                            if (uniqueUsername && !this.username.Equals("")) 
                                             {
                                                 using (SqlCommand command = new SqlCommand
                                                         ("INSERT INTO Extracted_Kinect_Data VALUES ( 1,'"
@@ -577,7 +740,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         "','" + this.maxWEShAngleR + "','" + this.minHWEAngleL +
                                                         "','" + this.meanHWEAngleL + "','" + this.maxHWEAngleL +
                                                         "','" + this.minWEShAngleL + "','" + this.meanWEShAngleL +
-                                                        "','" + this.maxWEShAngleL + "')", conn))
+                                                        "','" + this.maxWEShAngleL + 
+                                                        "','" + this.wristRelativeSpineShoulderR *100 +
+                                                        "','" + this.elbowRelativeSpineShoulderR *100 + 
+                                                        "','" + this.wristRelativeSpineShoulderL * 100 +
+                                                        "','" + this.elbowRelativeSpineShoulderL * 100 + "')", conn))
                                                 {
                                                     SqlDataReader reader = command.ExecuteReader();
                                                     reader.Close();
@@ -589,6 +756,81 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
                                         if (startClickedCounter == 0)
                                         {
+                                            int userRecords = 0;
+                                            using (SqlConnection conn = new SqlConnection(connectionString))
+                                            {
+                                                conn.Open();
+                                                SqlDataReader reader;
+                                                using (SqlCommand command = new SqlCommand("SELECT *" +
+                                                    "FROM Extracted_Kinect_Data " + "WHERE User_Id=" + this.userId,conn))
+                                                {
+                                                    reader = command.ExecuteReader();
+                                                    while(reader.Read())
+                                                    {
+                                                        this.handLengthRUserAcc += Convert.ToDouble(reader["Hand_Length_R"].ToString());
+                                                        this.upperArmLengthRUserAcc += Convert.ToDouble(reader["Upper_Arm_Length_R"].ToString());
+                                                        this.foreArmLengthRUserAcc += Convert.ToDouble(reader["Fore_Arm_Length_R"].ToString());
+                                                        this.shoulderLengthRUserAcc += Convert.ToDouble(reader["Shoulder_Length_R"].ToString());
+                                                        this.handLengthLUserAcc += Convert.ToDouble(reader["Hand_Length_L"].ToString());
+                                                        this.upperArmLengthLUserAcc += Convert.ToDouble(reader["Upper_Arm_Length_L"].ToString());
+                                                        this.foreArmLengthLUserAcc += Convert.ToDouble(reader["Fore_Arm_Length_L"].ToString());
+                                                        this.shoulderLengthLUserAcc += Convert.ToDouble(reader["Shoulder_Length_L"].ToString());
+                                                        this.neckLengthUserAcc += Convert.ToDouble(reader["Neck_Length"].ToString());
+                                                        this.backboneLengthUserAcc += Convert.ToDouble(reader["Backbone_Length"].ToString());
+                                                        this.lowerBackLengthUserAcc += Convert.ToDouble(reader["Lower_Back_Length"].ToString());
+                                                        this.hipLengthRUserAcc += Convert.ToDouble(reader["Hip_Length_R"].ToString());
+                                                        this.upperLegLengthRUserAcc += Convert.ToDouble(reader["Upper_Leg_Length_R"].ToString());
+                                                        this.shinLengthRUserAcc += Convert.ToDouble(reader["Shin_Length_R"].ToString());
+                                                        this.footLengthRUserAcc += Convert.ToDouble(reader["Foot_Length_R"].ToString());
+                                                        this.hipLengthLUserAcc += Convert.ToDouble(reader["Hip_Length_L"].ToString());
+                                                        this.upperLegLengthLUserAcc += Convert.ToDouble(reader["Upper_Leg_Length_L"].ToString());
+                                                        this.shinLengthLUserAcc += Convert.ToDouble(reader["Shin_Length_L"].ToString());
+                                                        this.footLengthLUserAcc += Convert.ToDouble(reader["Foot_Length_L"].ToString());
+                                                        this.minHWEAngleRUserAcc += Convert.ToDouble(reader["Min_HWE_Ang_R"].ToString());
+                                                        this.meanHWEAngleRUserAcc += Convert.ToDouble(reader["Mean_HWE_Ang_R"].ToString());
+                                                        this.maxHWEAngleRUserAcc += Convert.ToDouble(reader["Max_HWE_Ang_R"].ToString());
+                                                        this.minWEShAngleRUserAcc += Convert.ToDouble(reader["Min_WESh_Ang_R"].ToString());
+                                                        this.meanWEShAngleRUserAcc += Convert.ToDouble(reader["Mean_WESh_Ang_R"].ToString());
+                                                        this.maxWEShAngleRUserAcc += Convert.ToDouble(reader["Max_WESh_Ang_R"].ToString());
+                                                        this.minHWEAngleLUserAcc += Convert.ToDouble(reader["Min_HWE_Ang_L"].ToString());
+                                                        this.meanHWEAngleLUserAcc += Convert.ToDouble(reader["Mean_HWE_Ang_L"].ToString());
+                                                        this.maxHWEAngleLUserAcc += Convert.ToDouble(reader["Max_HWE_Ang_L"].ToString());
+                                                        this.minWEShAngleLUserAcc += Convert.ToDouble(reader["Min_WESh_Ang_L"].ToString());
+                                                        this.meanWEShAngleLUserAcc += Convert.ToDouble(reader["Mean_WESh_Ang_L"].ToString());
+                                                        this.maxWEShAngleLUserAcc += Convert.ToDouble(reader["Max_WESh_Ang_L"].ToString());
+                                                        this.wristRelativeSpineShoulderRUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_R"].ToString());
+                                                        this.elbowRelativeSpineShoulderRUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_R"].ToString());
+                                                        this.wristRelativeSpineShoulderLUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_L"].ToString());
+                                                        this.elbowRelativeSpineShoulderLUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_L"].ToString());
+
+                                                    }
+                                                    reader.Close();
+
+                                                    using (SqlCommand command1 = new SqlCommand("SELECT COUNT('Id') FROM  Extracted_Kinect_Data" +
+                                                        " WHERE User_Id='" + this.userId+"'",conn))
+                                                    {
+                                                        userRecords = (Int32)command1.ExecuteScalar();
+                                                    }
+                                                    
+                                                }
+
+                                                using (SqlCommand command = new SqlCommand
+                                                        ("INSERT INTO Templates VALUES ( 1,'" + this.userId 
+                                                        + "','" + this.handLengthRUserAcc / userRecords + "','" + this.upperArmLengthRUserAcc / userRecords + "','" +this.foreArmLengthRUserAcc/ userRecords + "','" + this.shoulderLengthRUserAcc / userRecords
+                                                        + "','" + this.handLengthLUserAcc / userRecords + "','" + this.upperArmLengthLUserAcc / userRecords + "','" + this.foreArmLengthLUserAcc / userRecords + "','" + this.shoulderLengthLUserAcc / userRecords
+                                                        + "','" + this.neckLengthUserAcc / userRecords + "','" + this.backboneLengthUserAcc / userRecords + "','" + this.lowerBackLengthUserAcc / userRecords + "','" + this.hipLengthRUserAcc / userRecords
+                                                        + "','" + this.upperLegLengthRUserAcc / userRecords + "','" + this.shinLengthRUserAcc / userRecords + "','" + this.footLengthRUserAcc / userRecords + "','" + this. hipLengthLUserAcc / userRecords + "','" + this.upperLegLengthLUserAcc / userRecords + "','" + this.shinLengthLUserAcc / userRecords
+                                                        + "','" + this.footLengthLUserAcc / userRecords + "','" + this.minHWEAngleRUserAcc / userRecords + "','" + this.meanHWEAngleRUserAcc / userRecords + "','" + this.maxHWEAngleRUserAcc / userRecords + "','" + this.minWEShAngleRUserAcc / userRecords + "','" + this.meanWEShAngleRUserAcc / userRecords
+                                                        + "','" + this.maxWEShAngleRUserAcc / userRecords + "','" + this.minHWEAngleLUserAcc / userRecords + "','" + this.meanHWEAngleLUserAcc / userRecords + "','" + this.maxHWEAngleLUserAcc / userRecords
+                                                        + "','" + this.minWEShAngleLUserAcc / userRecords + "','" + this.meanWEShAngleLUserAcc / userRecords + "','" + this.maxWEShAngleLUserAcc / userRecords + "','" + this.wristRelativeSpineShoulderRUserAcc / userRecords + "','" + this.elbowRelativeSpineShoulderRUserAcc / userRecords + "','" + this.wristRelativeSpineShoulderLUserAcc / userRecords + "','" + this.elbowRelativeSpineShoulderLUserAcc / userRecords
+                                                        + "')", conn))
+                                                {
+                                                    SqlDataReader reader1 = command.ExecuteReader();
+                                                    reader1.Close();
+                                                }
+                                                reader.Close();
+                                                conn.Close();
+                                            }
                                             message = "Registered Successfully! \n";
                                             this.username = "";
                                             this.uniqueUsername = false;
@@ -599,7 +841,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                             enter_label.Visibility = Visibility.Hidden;
                                             start_btn.Visibility = Visibility.Hidden;
                                             MessageBox.Show(message);
-                                            this.startClickedCounter = 10;
+                                            this.startClickedCounter = 2;
                                             this.frameCounter = 0;
                                         }
                                     }
