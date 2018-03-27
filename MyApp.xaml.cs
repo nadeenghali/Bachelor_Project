@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
+using System.Windows.Documents; 
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -34,6 +34,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         int userId;
         string username = "";
         int sessionId;
+        DateTime startFrameTime;
+        DateTime signInStartFrameTime;
+        bool inserted = true;
+        bool compared = true;
 
         //right
         double handLengthR = 0.0;
@@ -82,7 +86,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double wristRelativeSpineShoulderL = 0.0;
         double elbowRelativeSpineShoulderL = 0.0;
 
+        //velocity
+        double wristVelocity = 0.0;
+
         //accumilators
+
         //right
         double handLengthRAcc = 0.0;
         double upperArmLengthRAcc = 0.0;
@@ -121,6 +129,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
         double wristRelativeSpineShoulderLAcc = 0.0;
         double elbowRelativeSpineShoulderLAcc = 0.0;
+
+        //velocity
+        double wristVelocityAcc = 0.0;
 
 
         //user accumilatiors
@@ -164,6 +175,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double elbowRelativeSpineShoulderRUserAcc;
         double wristRelativeSpineShoulderLUserAcc;
         double elbowRelativeSpineShoulderLUserAcc;
+
+        double wristVelocityUserAcc = 0.0;
 
         //counters and flags
         Boolean uniqueUsername = false;
@@ -325,6 +338,14 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
         }
 
+        public double getVelocity(CameraSpacePoint previous, CameraSpacePoint current, TimeSpan time)
+        {
+            double distance = getDistanceBetweenJoints(previous,current);
+            double velocity = (distance * 100) / time.TotalMilliseconds;
+
+            return velocity;
+        }
+
         public double getDistanceBetweenJoints(CameraSpacePoint a, CameraSpacePoint b)
         {
             double result = 0;
@@ -345,6 +366,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             result = Vector3D.AngleBetween(v, u);
             return result;
         }
+
         public double getAngleAtMiddleJoint(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
         {
             double result = 0;
@@ -359,6 +381,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         {
 
         }
+
         private void username_txtbx_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
 
@@ -469,7 +492,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             }
             catch (Exception ex)
             {
-               message += "Oops database connection failed!";
+               message += "Oops database connection failed! -" + ex.ToString();
             }
 
             MessageBox.Show(message);
@@ -508,15 +531,17 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.frameCounter = 0;
             startClicked = true;
             startClickedCounter -= 1;
+            startFrameTime = DateTime.Now;
+            inserted = false;
 
             resetAttributeValues();
             resetAccumilators();
             
-            this.bodyFrameReader.FrameArrived += this.Reader_BodyFrameArrived;
+            this.bodyFrameReader.FrameArrived += this.register_Reader_BodyFrameArrived;
             //enter_label.Content = this.kinectSensor.BodyFrameSource.BodyCount;
         }
 
-        private void Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
+        private void register_Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             string message = "";
             bool dataReceived = false;
@@ -535,6 +560,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                     // those body objects will be re-used.
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
                     dataReceived = true;
+                    //double x = bodyFrame.;
                 }
             }
 
@@ -677,41 +703,41 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 {
                                     this.maxWEShAngleR = WEShAngleR;
                                 }
-
-
-                                if (frameCounter == 150)
+                                
+                                if (((DateTime.Now) - startFrameTime).Seconds == 5 && !inserted)
                                 {
-                                    this.handLengthR = handLengthRAcc / 150;
-                                    this.upperArmLengthR = upperArmLengthRAcc / 150;
-                                    this.foreArmLengthR = foreArmLengthRAcc / 150;
-                                    this.shoulderLengthR = shoulderLengthRAcc / 150;
-                                    this.hipLengthR = hipLengthRAcc / 150;
-                                    this.upperLegLengthR = upperLegLengthRAcc / 150;
-                                    this.shinLengthR = shinLengthRAcc / 150;
-                                    this.footLengthR = footLengthRAcc / 150;
+                                    inserted = true;
+                                    this.handLengthR = handLengthRAcc / frameCounter;
+                                    this.upperArmLengthR = upperArmLengthRAcc / frameCounter;
+                                    this.foreArmLengthR = foreArmLengthRAcc / frameCounter;
+                                    this.shoulderLengthR = shoulderLengthRAcc / frameCounter;
+                                    this.hipLengthR = hipLengthRAcc / frameCounter;
+                                    this.upperLegLengthR = upperLegLengthRAcc / frameCounter;
+                                    this.shinLengthR = shinLengthRAcc / frameCounter;
+                                    this.footLengthR = footLengthRAcc / frameCounter;
+                                    
+                                    this.handLengthL = handLengthLAcc / frameCounter;
+                                    this.upperArmLengthL = upperArmLengthLAcc / frameCounter;
+                                    this.foreArmLengthL = foreArmLengthLAcc / frameCounter;
+                                    this.shoulderLengthL = shoulderLengthLAcc / frameCounter;
+                                    this.hipLengthL = hipLengthLAcc / frameCounter;
+                                    this.upperLegLengthL = upperLegLengthLAcc / frameCounter;
+                                    this.shinLengthL = shinLengthLAcc / frameCounter;
+                                    this.footLengthL = footLengthLAcc / frameCounter;
 
-                                    this.handLengthL = handLengthLAcc / 150;
-                                    this.upperArmLengthL = upperArmLengthLAcc / 150;
-                                    this.foreArmLengthL = foreArmLengthLAcc / 150;
-                                    this.shoulderLengthL = shoulderLengthLAcc / 150;
-                                    this.hipLengthL = hipLengthLAcc / 150;
-                                    this.upperLegLengthL = upperLegLengthLAcc / 150;
-                                    this.shinLengthL = shinLengthLAcc / 150;
-                                    this.footLengthL = footLengthLAcc / 150;
+                                    this.neckLength = neckLengthAcc / frameCounter;
+                                    this.backboneLength = backboneLengthAcc / frameCounter;
+                                    this.lowerBackLength = lowerBackLengthAcc / frameCounter;
 
-                                    this.neckLength = neckLengthAcc / 150;
-                                    this.backboneLength = backboneLengthAcc / 150;
-                                    this.lowerBackLength = lowerBackLengthAcc / 150;
+                                    this.meanHWEAngleL = meanHWEAngleLAcc / frameCounter;
+                                    this.meanHWEAngleR = meanHWEAngleRAcc / frameCounter;
+                                    this.meanWEShAngleL = meanWEShAngleLAcc / frameCounter;
+                                    this.meanWEShAngleR = meanWEShAngleRAcc / frameCounter;
 
-                                    this.meanHWEAngleL = meanHWEAngleLAcc / 150;
-                                    this.meanHWEAngleR = meanHWEAngleRAcc / 150;
-                                    this.meanWEShAngleL = meanWEShAngleLAcc / 150;
-                                    this.meanWEShAngleR = meanWEShAngleRAcc / 150;
-
-                                    this.elbowRelativeSpineShoulderR = elbowRelativeSpineShoulderRAcc / 150;
-                                    this.wristRelativeSpineShoulderR = wristRelativeSpineShoulderRAcc / 150;
-                                    this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / 150;
-                                    this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / 150;
+                                    this.elbowRelativeSpineShoulderR = elbowRelativeSpineShoulderRAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderR = wristRelativeSpineShoulderRAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / frameCounter;
 
                                     resetAccumilators();
 
@@ -885,7 +911,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     {
                                         start_btn.Visibility = Visibility.Visible;
                                     }
-                                    this.bodyFrameReader.FrameArrived -= this.Reader_BodyFrameArrived;
+                                    else
+                                    {
+                                        start_btn.Visibility = Visibility.Hidden;
+                                    }
+                                    this.bodyFrameReader.FrameArrived -= this.register_Reader_BodyFrameArrived;
                                     break;
                                 }
                             }
@@ -906,15 +936,16 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             // set the BodyFramedArrived event notifier
             this.frameCounter = 0;
             signInStartClicked = true;
-
+            signInStartFrameTime = DateTime.Now;
+            compared = false;
             resetAttributeValues();
             resetAccumilators();
 
-            this.bodyFrameReader.FrameArrived += this.SignIn_Reader_BodyFrameArrived;
+            this.bodyFrameReader.FrameArrived += this.signIn_Reader_BodyFrameArrived;
 
         }
 
-        private void SignIn_Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
+        private void signIn_Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
         {
             bool dataReceived = false;
             using (BodyFrame bodyFrame = e.FrameReference.AcquireFrame())
@@ -1076,39 +1107,40 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 }
 
 
-                                if (frameCounter == 150)
+                                if (((DateTime.Now) - signInStartFrameTime).Seconds == 5 && !compared)
                                 {
-                                    this.handLengthR = handLengthRAcc / 150;
-                                    this.upperArmLengthR = upperArmLengthRAcc / 150;
-                                    this.foreArmLengthR = foreArmLengthRAcc / 150;
-                                    this.shoulderLengthR = shoulderLengthRAcc / 150;
-                                    this.hipLengthR = hipLengthRAcc / 150;
-                                    this.upperLegLengthR = upperLegLengthRAcc / 150;
-                                    this.shinLengthR = shinLengthRAcc / 150;
-                                    this.footLengthR = footLengthRAcc / 150;
+                                    compared = true;
+                                    this.handLengthR = handLengthRAcc / frameCounter;
+                                    this.upperArmLengthR = upperArmLengthRAcc / frameCounter;
+                                    this.foreArmLengthR = foreArmLengthRAcc / frameCounter;
+                                    this.shoulderLengthR = shoulderLengthRAcc / frameCounter;
+                                    this.hipLengthR = hipLengthRAcc / frameCounter;
+                                    this.upperLegLengthR = upperLegLengthRAcc / frameCounter;
+                                    this.shinLengthR = shinLengthRAcc / frameCounter;
+                                    this.footLengthR = footLengthRAcc / frameCounter;
 
-                                    this.handLengthL = handLengthLAcc / 150;
-                                    this.upperArmLengthL = upperArmLengthLAcc / 150;
-                                    this.foreArmLengthL = foreArmLengthLAcc / 150;
-                                    this.shoulderLengthL = shoulderLengthLAcc / 150;
-                                    this.hipLengthL = hipLengthLAcc / 150;
-                                    this.upperLegLengthL = upperLegLengthLAcc / 150;
-                                    this.shinLengthL = shinLengthLAcc / 150;
-                                    this.footLengthL = footLengthLAcc / 150;
+                                    this.handLengthL = handLengthLAcc / frameCounter;
+                                    this.upperArmLengthL = upperArmLengthLAcc / frameCounter;
+                                    this.foreArmLengthL = foreArmLengthLAcc / frameCounter;
+                                    this.shoulderLengthL = shoulderLengthLAcc / frameCounter;
+                                    this.hipLengthL = hipLengthLAcc / frameCounter;
+                                    this.upperLegLengthL = upperLegLengthLAcc / frameCounter;
+                                    this.shinLengthL = shinLengthLAcc / frameCounter;
+                                    this.footLengthL = footLengthLAcc / frameCounter;
 
-                                    this.neckLength = neckLengthAcc / 150;
-                                    this.backboneLength = backboneLengthAcc / 150;
-                                    this.lowerBackLength = lowerBackLengthAcc / 150;
+                                    this.neckLength = neckLengthAcc / frameCounter;
+                                    this.backboneLength = backboneLengthAcc / frameCounter;
+                                    this.lowerBackLength = lowerBackLengthAcc / frameCounter;
 
-                                    this.meanHWEAngleL = meanHWEAngleLAcc / 150;
-                                    this.meanHWEAngleR = meanHWEAngleRAcc / 150;
-                                    this.meanWEShAngleL = meanWEShAngleLAcc / 150;
-                                    this.meanWEShAngleR = meanWEShAngleRAcc / 150;
+                                    this.meanHWEAngleL = meanHWEAngleLAcc / frameCounter;
+                                    this.meanHWEAngleR = meanHWEAngleRAcc / frameCounter;
+                                    this.meanWEShAngleL = meanWEShAngleLAcc / frameCounter;
+                                    this.meanWEShAngleR = meanWEShAngleRAcc / frameCounter;
 
-                                    this.elbowRelativeSpineShoulderR = elbowRelativeSpineShoulderRAcc / 150;
-                                    this.wristRelativeSpineShoulderR = wristRelativeSpineShoulderRAcc / 150;
-                                    this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / 150;
-                                    this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / 150;
+                                    this.elbowRelativeSpineShoulderR = elbowRelativeSpineShoulderRAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderR = wristRelativeSpineShoulderRAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / frameCounter;
 
                                     resetAccumilators();
 
