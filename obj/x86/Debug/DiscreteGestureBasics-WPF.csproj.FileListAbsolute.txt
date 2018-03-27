@@ -1,11 +1,3 @@
-C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Database\Seated.gbd
-C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\DiscreteGestureBasics-WPF.exe.config
-C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\DiscreteGestureBasics-WPF.exe
-C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\DiscreteGestureBasics-WPF.pdb
-C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Microsoft.Kinect.dll
-C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Microsoft.Kinect.VisualGestureBuilder.dll
-C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Microsoft.Kinect.xml
-C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Microsoft.Kinect.VisualGestureBuilder.xml
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\MainWindow.g.cs
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\MyApp.g.cs
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\App.g.cs
@@ -13,6 +5,15 @@ C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\GeneratedInternalTypeHelper.g.cs
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\DiscreteGestureBasics-WPF_MarkupCompile.cache
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\DiscreteGestureBasics-WPF_MarkupCompile.lref
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\DiscreteGestureBasics-WPF.exe.config
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Database\Seated.gbd
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\DiscreteGestureBasics-WPF.exe
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\DiscreteGestureBasics-WPF.pdb
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\LeapCSharp.NET4.5.dll
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Microsoft.Kinect.dll
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Microsoft.Kinect.VisualGestureBuilder.dll
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Microsoft.Kinect.xml
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\Microsoft.Kinect.VisualGestureBuilder.xml
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\MainWindow.baml
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\MyApp.baml
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\DiscreteGestureBasics-WPF.g.resources
