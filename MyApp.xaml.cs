@@ -27,6 +27,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private KinectSensor kinectSensor = null;
         private Body[] bodies = null;
         private BodyFrameReader bodyFrameReader = null;
+        private BodyFrameReader bodyFrameReader1 = null;
         private string statusText = null;
         private KinectBodyView kinectBodyView = null;
 
@@ -88,6 +89,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
         //velocity
         double wristVelocity = 0.0;
+        double handVelocity = 0.0;
 
         //accumilators
 
@@ -132,6 +134,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
         //velocity
         double wristVelocityAcc = 0.0;
+        double handVelocityAcc = 0.0;
 
 
         //user accumilatiors
@@ -176,14 +179,21 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double wristRelativeSpineShoulderLUserAcc;
         double elbowRelativeSpineShoulderLUserAcc;
 
-        double wristVelocityUserAcc = 0.0;
+        double wristVelocityUserAcc;
+        double handVelocityUserAcc;
+
 
         //counters and flags
-        Boolean uniqueUsername = false;
+        bool uniqueUsername = false;
         int frameCounter = 0;
-        Boolean startClicked = false;
-        Boolean signInStartClicked = false;
+        bool startClicked = false;
+        bool signInStartClicked = false;
         int startClickedCounter = 10;
+
+        //velocity attr
+        CameraSpacePoint oldWristPos;
+        CameraSpacePoint oldHandPos;
+        DateTime oldFrameTime;
 
         public MyApp()
         {
@@ -193,6 +203,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                             : Properties.Resources.NoSensorStatusText;
 
             this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
+            this.bodyFrameReader1 = this.kinectSensor.BodyFrameSource.OpenReader();
             this.kinectBodyView = new KinectBodyView(this.kinectSensor);
             int maxBodies = this.kinectSensor.BodyFrameSource.BodyCount;
             InitializeComponent();
@@ -397,6 +408,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             string message = "";
             string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
             this.frameCounter = 0;
+            this.startClickedCounter = 10;
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -527,7 +539,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             // open the reader for the body frames
             this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
 
-            // set the BodyFramedArrived event notifier
             this.frameCounter = 0;
             startClicked = true;
             startClickedCounter -= 1;
@@ -537,8 +548,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             resetAttributeValues();
             resetAccumilators();
             
+            // set the BodyFramedArrived event notifier
             this.bodyFrameReader.FrameArrived += this.register_Reader_BodyFrameArrived;
-            //enter_label.Content = this.kinectSensor.BodyFrameSource.BodyCount;
         }
 
         private void register_Reader_BodyFrameArrived(object sender, BodyFrameArrivedEventArgs e)
@@ -560,7 +571,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                     // those body objects will be re-used.
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
                     dataReceived = true;
-                    //double x = bodyFrame.;
                 }
             }
 
@@ -644,8 +654,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     (joints[JointType.ElbowLeft].Position,
                                     joints[JointType.WristLeft].Position,
                                     joints[JointType.ThumbLeft].Position);
-
-
+                                
                                 double WEShAngleL = getAngleAtMiddleJoint
                                     (joints[JointType.WristLeft].Position,
                                     joints[JointType.ElbowLeft].Position,
@@ -704,6 +713,21 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.maxWEShAngleR = WEShAngleR;
                                 }
                                 
+                                if(frameCounter == 1)
+                                {
+                                    this.wristVelocityAcc = 0;
+                                    this.handVelocityAcc = 0;
+                                }
+                                else
+                                {
+                                    this.wristVelocityAcc = getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, oldFrameTime - DateTime.Now);
+                                    this.handVelocityAcc = getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, oldFrameTime - DateTime.Now);
+                                }
+
+                                this.oldFrameTime = DateTime.Now;
+                                this.oldWristPos = joints[JointType.WristRight].Position;
+                                this.oldHandPos = joints[JointType.HandRight].Position;
+
                                 if (((DateTime.Now) - startFrameTime).Seconds == 5 && !inserted)
                                 {
                                     inserted = true;
@@ -738,6 +762,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.wristRelativeSpineShoulderR = wristRelativeSpineShoulderRAcc / frameCounter;
                                     this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / frameCounter;
                                     this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / frameCounter;
+
+                                    this.wristVelocity = wristVelocityAcc / (frameCounter - 1);
+                                    this.handVelocity = handVelocityAcc / (frameCounter - 1);
 
                                     resetAccumilators();
 
@@ -796,7 +823,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         "','" + this.wristRelativeSpineShoulderR *100 +
                                                         "','" + this.elbowRelativeSpineShoulderR *100 + 
                                                         "','" + this.wristRelativeSpineShoulderL * 100 +
-                                                        "','" + this.elbowRelativeSpineShoulderL * 100 + "')", conn))
+                                                        "','" + this.elbowRelativeSpineShoulderL * 100 +
+                                                        "','" + this.wristVelocity +
+                                                        "','" + this.handVelocity + "')", conn))
                                                 {
                                                     SqlDataReader reader = command.ExecuteReader();
                                                     reader.Close();
@@ -855,6 +884,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         this.wristRelativeSpineShoulderLUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_L"].ToString());
                                                         this.elbowRelativeSpineShoulderLUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_L"].ToString());
 
+                                                        this.wristVelocityUserAcc += Convert.ToDouble(reader["Wrist_Velocity_R"].ToString());
+                                                        this.handVelocityUserAcc += Convert.ToDouble(reader["Hand_Velocity_R"].ToString());
                                                     }
                                                     reader.Close();
 
@@ -874,7 +905,12 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         + "','" + this.upperLegLengthRUserAcc / userRecords + "','" + this.shinLengthRUserAcc / userRecords + "','" + this.footLengthRUserAcc / userRecords + "','" + this. hipLengthLUserAcc / userRecords + "','" + this.upperLegLengthLUserAcc / userRecords + "','" + this.shinLengthLUserAcc / userRecords
                                                         + "','" + this.footLengthLUserAcc / userRecords + "','" + this.minHWEAngleRUserAcc / userRecords + "','" + this.meanHWEAngleRUserAcc / userRecords + "','" + this.maxHWEAngleRUserAcc / userRecords + "','" + this.minWEShAngleRUserAcc / userRecords + "','" + this.meanWEShAngleRUserAcc / userRecords
                                                         + "','" + this.maxWEShAngleRUserAcc / userRecords + "','" + this.minHWEAngleLUserAcc / userRecords + "','" + this.meanHWEAngleLUserAcc / userRecords + "','" + this.maxHWEAngleLUserAcc / userRecords
-                                                        + "','" + this.minWEShAngleLUserAcc / userRecords + "','" + this.meanWEShAngleLUserAcc / userRecords + "','" + this.maxWEShAngleLUserAcc / userRecords + "','" + this.wristRelativeSpineShoulderRUserAcc / userRecords + "','" + this.elbowRelativeSpineShoulderRUserAcc / userRecords + "','" + this.wristRelativeSpineShoulderLUserAcc / userRecords + "','" + this.elbowRelativeSpineShoulderLUserAcc / userRecords
+                                                        + "','" + this.minWEShAngleLUserAcc / userRecords + "','" + this.meanWEShAngleLUserAcc / userRecords + "','" + this.maxWEShAngleLUserAcc / userRecords + "','" + this.wristRelativeSpineShoulderRUserAcc / userRecords 
+                                                        + "','" + this.elbowRelativeSpineShoulderRUserAcc / userRecords 
+                                                        + "','" + this.wristRelativeSpineShoulderLUserAcc / userRecords 
+                                                        + "','" + this.elbowRelativeSpineShoulderLUserAcc / userRecords
+                                                        + "','" + this.wristVelocityUserAcc / userRecords
+                                                        + "','" + this.handVelocityUserAcc / userRecords
                                                         + "')", conn))
                                                 {
                                                     SqlDataReader reader1 = command.ExecuteReader();
@@ -893,7 +929,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                             enter_label.Visibility = Visibility.Hidden;
                                             start_btn.Visibility = Visibility.Hidden;
                                             MessageBox.Show(message);
-                                            this.startClickedCounter = 10;
                                             this.frameCounter = 0;
                                             resetUserAccumilators();
                                             resetAttributeValues();
@@ -911,12 +946,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     {
                                         start_btn.Visibility = Visibility.Visible;
                                     }
-                                    else
-                                    {
-                                        start_btn.Visibility = Visibility.Hidden;
-                                    }
                                     this.bodyFrameReader.FrameArrived -= this.register_Reader_BodyFrameArrived;
-                                    break;
+                                    this.bodyFrameReader.Dispose();
+                                    this.bodyFrameReader = null;
+                                    // break;
                                 }
                             }
                         }
@@ -931,7 +964,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             signInStart_btn.Visibility = Visibility.Hidden;
             notRegistered_btn.Visibility = Visibility.Hidden;
             // open the reader for the body frames
-            this.bodyFrameReader = this.kinectSensor.BodyFrameSource.OpenReader();
+            this.bodyFrameReader1 = this.kinectSensor.BodyFrameSource.OpenReader();
 
             // set the BodyFramedArrived event notifier
             this.frameCounter = 0;
@@ -941,7 +974,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             resetAttributeValues();
             resetAccumilators();
 
-            this.bodyFrameReader.FrameArrived += this.signIn_Reader_BodyFrameArrived;
+            this.bodyFrameReader1.FrameArrived += this.signIn_Reader_BodyFrameArrived;
 
         }
 
@@ -1106,6 +1139,20 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.maxWEShAngleR = WEShAngleR;
                                 }
 
+                                if (frameCounter == 1)
+                                {
+                                    this.wristVelocityAcc = 0;
+                                    this.handVelocityAcc = 0;
+                                }
+                                else
+                                {
+                                    this.wristVelocityAcc = getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, oldFrameTime - DateTime.Now);
+                                    this.handVelocityAcc = getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, oldFrameTime - DateTime.Now);
+                                }
+
+                                this.oldFrameTime = DateTime.Now;
+                                this.oldWristPos = joints[JointType.WristRight].Position;
+                                this.oldHandPos = joints[JointType.HandRight].Position;
 
                                 if (((DateTime.Now) - signInStartFrameTime).Seconds == 5 && !compared)
                                 {
@@ -1142,6 +1189,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / frameCounter;
                                     this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / frameCounter;
 
+
+                                    this.wristVelocity = wristVelocityAcc / (frameCounter - 1);
+                                    this.handVelocity = handVelocityAcc / (frameCounter - 1);
+
                                     resetAccumilators();
 
                                     string connectionString = null;
@@ -1173,15 +1224,16 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         Math.Pow(Convert.ToDouble(reader["Neck_Length"].ToString()) - this.neckLength, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Backbone_Length"].ToString()) - this.backboneLength, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Lower_Back_Length"].ToString()) - this.lowerBackLength, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Hip_Length_R"].ToString()) - this.hipLengthR, 2) +
-
-                                                        Math.Pow(Convert.ToDouble(reader["Upper_Leg_Length_R"].ToString()) - this.upperLegLengthR, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Shin_Length_R"].ToString()) - this.shinLengthR, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Foot_Length_R"].ToString()) - this.footLengthR, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Hip_Length_L"].ToString()) - this.hipLengthL, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Upper_Leg_Length_L"].ToString()) - this.upperLegLengthL, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Shin_Length_L"].ToString()) - this.shinLengthL, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Foot_Length_L"].ToString()) - this.footLengthL, 2) +
+                                                       
+                                                        //Math.Pow(Convert.ToDouble(reader["Hip_Length_R"].ToString()) - this.hipLengthR, 2) +
+                                                        //Math.Pow(Convert.ToDouble(reader["Upper_Leg_Length_R"].ToString()) - this.upperLegLengthR, 2) +
+                                                        //Math.Pow(Convert.ToDouble(reader["Shin_Length_R"].ToString()) - this.shinLengthR, 2) +
+                                                        //Math.Pow(Convert.ToDouble(reader["Foot_Length_R"].ToString()) - this.footLengthR, 2) +
+                                                        //Math.Pow(Convert.ToDouble(reader["Hip_Length_L"].ToString()) - this.hipLengthL, 2) +
+                                                        //Math.Pow(Convert.ToDouble(reader["Upper_Leg_Length_L"].ToString()) - this.upperLegLengthL, 2) +
+                                                        //Math.Pow(Convert.ToDouble(reader["Shin_Length_L"].ToString()) - this.shinLengthL, 2) +
+                                                        //Math.Pow(Convert.ToDouble(reader["Foot_Length_L"].ToString()) - this.footLengthL, 2) +
+                                                       
                                                         Math.Pow(Convert.ToDouble(reader["Min_HWE_Ang_R"].ToString()) - this.minHWEAngleR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Mean_HWE_Ang_R"].ToString()) - this.meanHWEAngleR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Max_HWE_Ang_R"].ToString()) - this.maxHWEAngleR, 2) +
@@ -1202,7 +1254,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_R"].ToString()) - this.wristRelativeSpineShoulderR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_R"].ToString()) - this.elbowRelativeSpineShoulderR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_L"].ToString()) - this.wristRelativeSpineShoulderL, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_L"].ToString()) - this.elbowRelativeSpineShoulderL, 2)
+                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_L"].ToString()) - this.elbowRelativeSpineShoulderL, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Velocity_R"].ToString()) - this.wristVelocity, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Hand_Velocity_R"].ToString()) - this.handVelocity, 2)
                                                         );
                                                     if (currentError < minError)
                                                     {
@@ -1236,6 +1290,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     {
                                         MessageBox.Show(ex.ToString());
                                     }
+                                    this.bodyFrameReader1.FrameArrived -= this.signIn_Reader_BodyFrameArrived;
+                                    this.bodyFrameReader1.Dispose();
+                                    this.bodyFrameReader1 = null;
                                 }
                            }
                         }
