@@ -1198,7 +1198,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.bodyFrameReader.FrameArrived -= this.register_Reader_BodyFrameArrived;
                                     this.bodyFrameReader.Dispose();
                                     this.bodyFrameReader = null;
-                                    // break;
                                 }
                             }
                         }
