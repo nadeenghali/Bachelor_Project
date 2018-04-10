@@ -80,6 +80,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double meanWEShAngleL = 0.0;
         double maxWEShAngleL = 0.0;
 
+        double minEShSAngleR = 360.0;
+        double meanEShSAngleR = 0.0;
+        double maxEShSAngleR = 0.0;
+        double minEShSAngleL = 360.0;
+        double meanEShSAngleL = 0.0;
+        double maxEShSAngleL = 0.0;
+
         //relative distances
         double wristRelativeSpineShoulderRx = 0.0;
         double elbowRelativeSpineShoulderRx = 0.0;
@@ -101,9 +108,14 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
 
         //velocity and acceleration
-        double wristVelocity = 0.0;
-        double handVelocity = 0.0;
-        double wristAcceleration = 0.0;
+        double wristVelocityR = 0.0;
+        double handVelocityR = 0.0;
+        double wristVelocityL = 0.0;
+        double handVelocityL = 0.0;
+
+        double wristAccelerationR = 0.0;
+        double wristAccelerationL = 0.0;
+
 
         //accumilators
 
@@ -138,6 +150,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double meanHWEAngleLAcc = 0.0;
         double meanWEShAngleRAcc = 0.0;
         double meanWEShAngleLAcc = 0.0;
+        double meanEShSAngleRAcc = 0.0;
+        double meanEShSAngleLAcc = 0.0;
 
         //relative distances
         double wristRelativeSpineShoulderRxAcc = 0.0;
@@ -159,12 +173,19 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double elbowRelativeSpineShoulderLzAcc = 0.0;
 
         //velocity
-        double wristVelocityAcc = 0.0;
-        double handVelocityAcc = 0.0;
-        double wristAccelerationAcc = 0.0;
+        double wristVelocityAccR = 0.0;
+        double handVelocityAccR = 0.0;
+        double wristVelocityAccL = 0.0;
+        double handVelocityAccL = 0.0;
 
-        double oldWristVelocity = 0.0;
-        double newWristVelocity = 0.0;
+        double wristAccelerationAccR = 0.0;
+        double wristAccelerationAccL = 0.0;
+
+        double oldWristVelocityR = 0.0;
+        double newWristVelocityR = 0.0;
+        
+        double oldWristVelocityL = 0.0;
+        double newWristVelocityL = 0.0;
 
         //user accumilatiors
 
@@ -187,6 +208,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double upperLegLengthLUserAcc;
         double shinLengthLUserAcc;
         double footLengthLUserAcc;
+
         double minHWEAngleRUserAcc;
         double meanHWEAngleRUserAcc;
         double maxHWEAngleRUserAcc;
@@ -195,6 +217,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double meanWEShAngleRUserAcc;
         double maxWEShAngleRUserAcc;
 
+        double minEShSAngleRUserAcc;
+        double meanEShSAngleRUserAcc;
+        double maxEShSAngleRUserAcc;
+
         double meanHWEAngleLUserAcc;
         double maxHWEAngleLUserAcc;
         double minHWEAngleLUserAcc;
@@ -202,6 +228,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double minWEShAngleLUserAcc;
         double meanWEShAngleLUserAcc;
         double maxWEShAngleLUserAcc;
+
+        double minEShSAngleLUserAcc;
+        double meanEShSAngleLUserAcc;
+        double maxEShSAngleLUserAcc;
 
         double wristRelativeSpineShoulderRxUserAcc;
         double elbowRelativeSpineShoulderRxUserAcc;
@@ -218,10 +248,14 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double wristRelativeSpineShoulderLzUserAcc;
         double elbowRelativeSpineShoulderLzUserAcc;
 
-        double wristVelocityUserAcc;
-        double handVelocityUserAcc;
-        double wristAccelerationUserAcc;
-        
+        double wristVelocityUserAccR;
+        double handVelocityUserAccR;
+        double wristVelocityUserAccL;
+        double handVelocityUserAccL;
+
+        double wristAccelerationUserAccR;
+        double wristAccelerationUserAccL;
+
         //counters and flags
         bool uniqueUsername = false;
         int frameCounter = 0;
@@ -283,6 +317,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.meanHWEAngleLAcc = 0.0;
             this.meanWEShAngleRAcc = 0.0;
             this.meanWEShAngleLAcc = 0.0;
+            this.meanEShSAngleRAcc = 0.0;
+            this.meanEShSAngleLAcc = 0.0;
 
             //relative distances
             this.wristRelativeSpineShoulderRxAcc = 0.0;
@@ -304,9 +340,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.elbowRelativeSpineShoulderLzAcc = 0.0;
 
             //velocity
-            this.wristVelocityAcc = 0.0;
-            this.handVelocityAcc = 0.0;
-            this.wristAccelerationAcc = 0.0;
+            this.wristVelocityAccR = 0.0;
+            this.handVelocityAccR = 0.0;
+            this.wristVelocityAccL = 0.0;
+            this.handVelocityAccL = 0.0;
+
+            this.wristAccelerationAccR = 0.0;
+            this.wristAccelerationAccL = 0.0;
         }
 
         private void resetUserAccumilators()
@@ -331,6 +371,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.upperLegLengthLUserAcc = 0.0;
             this.shinLengthLUserAcc = 0.0;
             this.footLengthLUserAcc = 0.0;
+
             this.minHWEAngleRUserAcc = 0.0;
             this.meanHWEAngleRUserAcc = 0.0;
             this.maxHWEAngleRUserAcc = 0.0;
@@ -339,6 +380,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.meanWEShAngleRUserAcc = 0.0;
             this.maxWEShAngleRUserAcc = 0.0;
 
+            this.minEShSAngleRUserAcc = 0.0;
+            this.meanEShSAngleRUserAcc = 0.0;
+            this.maxEShSAngleRUserAcc = 0.0;
+
             this.meanHWEAngleLUserAcc = 0.0;
             this.maxHWEAngleLUserAcc = 0.0;
             this.minHWEAngleLUserAcc = 0.0;
@@ -346,6 +391,10 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.minWEShAngleLUserAcc = 0.0;
             this.meanWEShAngleLUserAcc = 0.0;
             this.maxWEShAngleLUserAcc = 0.0;
+
+            this.minEShSAngleLUserAcc = 0.0;
+            this.meanEShSAngleLUserAcc = 0.0;
+            this.maxEShSAngleLUserAcc = 0.0;
 
             this.wristRelativeSpineShoulderRxUserAcc = 0.0;
             this.elbowRelativeSpineShoulderRxUserAcc = 0.0;
@@ -362,9 +411,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.wristRelativeSpineShoulderLzUserAcc = 0.0;
             this.elbowRelativeSpineShoulderLzUserAcc = 0.0;
 
-            this.wristVelocityUserAcc = 0.0;
-            this.handVelocityUserAcc = 0.0;
-            this.wristAccelerationUserAcc = 0.0;
+            this.wristVelocityUserAccR = 0.0;
+            this.handVelocityUserAccR = 0.0;
+            this.wristVelocityUserAccL = 0.0;
+            this.handVelocityUserAccL = 0.0;
+
+            this.wristAccelerationUserAccR = 0.0;
+            this.wristAccelerationUserAccL = 0.0;
         }
 
         private void resetAttributeValues()
@@ -408,6 +461,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.meanWEShAngleL = 0.0;
             this.maxWEShAngleL = 0.0;
 
+            this.minEShSAngleR = 360.0;
+            this.meanEShSAngleR = 0.0;
+            this.maxEShSAngleR = 0.0;
+            this.minEShSAngleL = 360.0;
+            this.meanEShSAngleL = 0.0;
+            this.maxEShSAngleL = 0.0;
+
             //relative distances
             this.wristRelativeSpineShoulderRx = 0.0;
             this.elbowRelativeSpineShoulderRx = 0.0;
@@ -429,9 +489,14 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.wristRelativeSpineShoulderLz = 0.0;
             this.elbowRelativeSpineShoulderLz = 0.0;
 
-            this.wristVelocity = 0.0;
-            this.handVelocity = 0.0;
-            this.wristAcceleration = 0.0;
+            this.wristVelocityR = 0.0;
+            this.handVelocityR = 0.0;
+
+            this.wristVelocityL = 0.0;
+            this.handVelocityL = 0.0;
+
+            this.wristAccelerationR = 0.0;
+            this.wristAccelerationL = 0.0;
         }
 
         private void username_txtbx_TextChanged(object sender, TextChangedEventArgs e)
@@ -725,6 +790,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     joints[JointType.ElbowLeft].Position,
                                     joints[JointType.ShoulderLeft].Position);
 
+                                double EShSAngleL = HelperMethods.getAngleAtMiddleJoint
+                                    (joints[JointType.ElbowLeft].Position,
+                                    joints[JointType.ShoulderLeft].Position,
+                                    joints[JointType.SpineShoulder].Position);
+
                                 double HWEAngleR = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.ElbowRight].Position,
                                     joints[JointType.WristRight].Position,
@@ -735,11 +805,18 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     joints[JointType.ElbowRight].Position,
                                     joints[JointType.ShoulderRight].Position);
 
+                                double EShSAngleR = HelperMethods.getAngleAtMiddleJoint
+                                    (joints[JointType.ElbowRight].Position,
+                                    joints[JointType.ShoulderRight].Position,
+                                    joints[JointType.SpineShoulder].Position);
+
                                 this.meanHWEAngleLAcc += HWEAngleL;
                                 this.meanWEShAngleLAcc += WEShAngleL;
+                                this.meanEShSAngleLAcc += EShSAngleL;
 
                                 this.meanHWEAngleRAcc += HWEAngleR;
                                 this.meanWEShAngleRAcc += WEShAngleR;
+                                this.meanEShSAngleRAcc += EShSAngleR;
 
 
                                 if (this.minHWEAngleL > HWEAngleL)
@@ -760,7 +837,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.maxHWEAngleR = HWEAngleR;
                                 }
 
-                                if (this.minWEShAngleL > HWEAngleL)
+                                if (this.minWEShAngleL > WEShAngleL)
                                 {
                                     this.minWEShAngleL = WEShAngleL;
                                 }
@@ -777,21 +854,50 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 {
                                     this.maxWEShAngleR = WEShAngleR;
                                 }
-                                
-                                if(frameCounter == 1)
+
+                                if (this.minWEShAngleL > HWEAngleL)
                                 {
-                                    this.wristVelocityAcc = 0;
-                                    this.handVelocityAcc = 0;
-                                    this.oldWristVelocity = 0;
+                                    this.minWEShAngleL = WEShAngleL;
+                                }
+                                if (this.maxWEShAngleL < WEShAngleL)
+                                {
+                                    this.maxWEShAngleL = WEShAngleL;
+                                }
+
+                                if (this.minEShSAngleR > EShSAngleR)
+                                {
+                                    this.minEShSAngleR = EShSAngleR;
+                                }
+                                if (this.maxEShSAngleR < EShSAngleR)
+                                {
+                                    this.maxEShSAngleR = EShSAngleR;
+                                }
+
+                                if (frameCounter == 1)
+                                {
+                                    this.wristVelocityAccR = 0;
+                                    this.handVelocityAccR = 0;
+                                    this.oldWristVelocityR = 0;
+
+                                    this.wristVelocityAccL = 0;
+                                    this.handVelocityAccL = 0;
+                                    this.oldWristVelocityL = 0;
                                 }
                                 else
                                 {
-                                    this.newWristVelocity = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
-                                    this.handVelocityAcc += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
-                                    this.wristVelocityAcc += this.newWristVelocity;
-                                    this.wristAccelerationAcc += HelperMethods.getAcceleration(this.oldWristVelocity, this.newWristVelocity, DateTime.Now - oldFrameTime);
+                                    this.newWristVelocityR = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAccR += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.wristVelocityAccR += this.newWristVelocityR;
+                                    this.wristAccelerationAccR += HelperMethods.getAcceleration(this.oldWristVelocityR, this.newWristVelocityR, DateTime.Now - oldFrameTime);
 
-                                    this.oldWristVelocity = this.newWristVelocity;
+                                    this.oldWristVelocityR = this.newWristVelocityR;
+
+                                    this.newWristVelocityL = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAccL += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.wristVelocityAccL += this.newWristVelocityL;
+                                    this.wristAccelerationAccL += HelperMethods.getAcceleration(this.oldWristVelocityL, this.newWristVelocityL, DateTime.Now - oldFrameTime);
+
+                                    this.oldWristVelocityL = this.newWristVelocityL;
                                 }
 
                                 this.oldFrameTime = DateTime.Now;
@@ -827,6 +933,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.meanHWEAngleR = meanHWEAngleRAcc / frameCounter;
                                     this.meanWEShAngleL = meanWEShAngleLAcc / frameCounter;
                                     this.meanWEShAngleR = meanWEShAngleRAcc / frameCounter;
+                                    this.meanEShSAngleL = meanWEShAngleLAcc / frameCounter;
+                                    this.meanEShSAngleR = meanWEShAngleRAcc / frameCounter;
 
                                     this.elbowRelativeSpineShoulderRx = elbowRelativeSpineShoulderRxAcc / frameCounter;
                                     this.wristRelativeSpineShoulderRx = wristRelativeSpineShoulderRxAcc / frameCounter;
@@ -843,10 +951,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.elbowRelativeSpineShoulderLz = elbowRelativeSpineShoulderLzAcc / frameCounter;
                                     this.wristRelativeSpineShoulderLz = wristRelativeSpineShoulderLzAcc / frameCounter;
 
-                                    this.wristVelocity = (wristVelocityAcc / (frameCounter - 1));
-                                    this.handVelocity = (handVelocityAcc / (frameCounter - 1));
+                                    this.wristVelocityR = (wristVelocityAccR / (frameCounter - 1));
+                                    this.handVelocityR = (handVelocityAccR / (frameCounter - 1));
 
-                                    this.wristAcceleration = (wristAccelerationAcc / (frameCounter - 1));
+                                    this.wristAccelerationR = (wristAccelerationAccR / (frameCounter - 1));
+
+                                    this.wristVelocityL = (wristVelocityAccL / (frameCounter - 1));
+                                    this.handVelocityL = (handVelocityAccL / (frameCounter - 1));
+
+                                    this.wristAccelerationL = (wristAccelerationAccL / (frameCounter - 1));
 
                                     resetAccumilators();
 
@@ -898,10 +1011,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         "','" + this.footLengthL * 100 + "','" + this.minHWEAngleR +
                                                         "','" + this.meanHWEAngleR + "','" + this.maxHWEAngleR +
                                                         "','" + this.minWEShAngleR + "','" + this.meanWEShAngleR +
-                                                        "','" + this.maxWEShAngleR + "','" + this.minHWEAngleL +
-                                                        "','" + this.meanHWEAngleL + "','" + this.maxHWEAngleL +
+                                                        "','" + this.maxWEShAngleR +
+                                                        "','" + this.minEShSAngleR + "','" + this.meanEShSAngleR +
+                                                        "','" + this.maxEShSAngleR + 
+                                                        "','" + this.minHWEAngleL + "','" + this.meanHWEAngleL +
+                                                        "','" + this.maxHWEAngleL +
                                                         "','" + this.minWEShAngleL + "','" + this.meanWEShAngleL +
-                                                        "','" + this.maxWEShAngleL + 
+                                                        "','" + this.maxWEShAngleL +
+                                                        "','" + this.minEShSAngleL + "','" + this.meanEShSAngleL +
+                                                        "','" + this.maxEShSAngleL +
                                                         "','" + this.wristRelativeSpineShoulderRx *100 +
                                                         "','" + this.elbowRelativeSpineShoulderRx *100 + 
                                                         "','" + this.wristRelativeSpineShoulderLx * 100 +
@@ -914,9 +1032,12 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         "','" + this.elbowRelativeSpineShoulderRz * 100 +
                                                         "','" + this.wristRelativeSpineShoulderLz * 100 +
                                                         "','" + this.elbowRelativeSpineShoulderLz * 100 +
-                                                        "','" + this.wristVelocity +
-                                                        "','" + this.handVelocity +
-                                                        "','" + this.wristAcceleration + "')", conn))
+                                                        "','" + this.wristVelocityR +
+                                                        "','" + this.handVelocityR +
+                                                        "','" + this.wristVelocityL +
+                                                        "','" + this.handVelocityL +
+                                                        "','" + this.wristAccelerationR +
+                                                        "','" + this.wristAccelerationL + "')", conn))
                                                 {
                                                     SqlDataReader reader = command.ExecuteReader();
                                                     reader.Close();
@@ -964,12 +1085,18 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         this.minWEShAngleRUserAcc += Convert.ToDouble(reader["Min_WESh_Ang_R"].ToString());
                                                         this.meanWEShAngleRUserAcc += Convert.ToDouble(reader["Mean_WESh_Ang_R"].ToString());
                                                         this.maxWEShAngleRUserAcc += Convert.ToDouble(reader["Max_WESh_Ang_R"].ToString());
+                                                        this.minEShSAngleRUserAcc += Convert.ToDouble(reader["Min_EShS_Ang_R"].ToString());
+                                                        this.meanEShSAngleRUserAcc += Convert.ToDouble(reader["Mean_EShS_Ang_R"].ToString());
+                                                        this.maxEShSAngleRUserAcc += Convert.ToDouble(reader["Max_EShS_Ang_R"].ToString());
                                                         this.minHWEAngleLUserAcc += Convert.ToDouble(reader["Min_HWE_Ang_L"].ToString());
                                                         this.meanHWEAngleLUserAcc += Convert.ToDouble(reader["Mean_HWE_Ang_L"].ToString());
                                                         this.maxHWEAngleLUserAcc += Convert.ToDouble(reader["Max_HWE_Ang_L"].ToString());
                                                         this.minWEShAngleLUserAcc += Convert.ToDouble(reader["Min_WESh_Ang_L"].ToString());
                                                         this.meanWEShAngleLUserAcc += Convert.ToDouble(reader["Mean_WESh_Ang_L"].ToString());
                                                         this.maxWEShAngleLUserAcc += Convert.ToDouble(reader["Max_WESh_Ang_L"].ToString());
+                                                        this.minEShSAngleLUserAcc += Convert.ToDouble(reader["Min_EShS_Ang_L"].ToString());
+                                                        this.meanEShSAngleLUserAcc += Convert.ToDouble(reader["Mean_EShS_Ang_L"].ToString());
+                                                        this.maxEShSAngleLUserAcc += Convert.ToDouble(reader["Max_EShS_Ang_L"].ToString());
                                                         this.wristRelativeSpineShoulderRxUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Rx"].ToString());
                                                         this.elbowRelativeSpineShoulderRxUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Rx"].ToString());
                                                         this.wristRelativeSpineShoulderLxUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lx"].ToString());
@@ -983,9 +1110,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         this.wristRelativeSpineShoulderLzUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lz"].ToString());
                                                         this.elbowRelativeSpineShoulderLzUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Lx"].ToString());
 
-                                                        this.wristVelocityUserAcc += Convert.ToDouble(reader["Wrist_Velocity_R"].ToString());
-                                                        this.handVelocityUserAcc += Convert.ToDouble(reader["Hand_Velocity_R"].ToString());
-                                                        this.wristAccelerationUserAcc += Convert.ToDouble(reader["Wrist_Acceleration_R"].ToString());
+                                                        this.wristVelocityUserAccR += Convert.ToDouble(reader["Wrist_Velocity_R"].ToString());
+                                                        this.handVelocityUserAccR += Convert.ToDouble(reader["Hand_Velocity_R"].ToString());
+                                                        this.wristAccelerationUserAccR += Convert.ToDouble(reader["Wrist_Acceleration_R"].ToString());
+
+                                                        this.wristVelocityUserAccL += Convert.ToDouble(reader["Wrist_Velocity_L"].ToString());
+                                                        this.handVelocityUserAccL += Convert.ToDouble(reader["Hand_Velocity_L"].ToString());
+                                                        this.wristAccelerationUserAccL += Convert.ToDouble(reader["Wrist_Acceleration_L"].ToString());
                                                     }
                                                     reader.Close();
 
@@ -1004,8 +1135,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         + "','" + this.neckLengthUserAcc / userRecords + "','" + this.backboneLengthUserAcc / userRecords + "','" + this.lowerBackLengthUserAcc / userRecords + "','" + this.hipLengthRUserAcc / userRecords
                                                         + "','" + this.upperLegLengthRUserAcc / userRecords + "','" + this.shinLengthRUserAcc / userRecords + "','" + this.footLengthRUserAcc / userRecords + "','" + this. hipLengthLUserAcc / userRecords + "','" + this.upperLegLengthLUserAcc / userRecords + "','" + this.shinLengthLUserAcc / userRecords
                                                         + "','" + this.footLengthLUserAcc / userRecords + "','" + this.minHWEAngleRUserAcc / userRecords + "','" + this.meanHWEAngleRUserAcc / userRecords + "','" + this.maxHWEAngleRUserAcc / userRecords + "','" + this.minWEShAngleRUserAcc / userRecords + "','" + this.meanWEShAngleRUserAcc / userRecords
-                                                        + "','" + this.maxWEShAngleRUserAcc / userRecords + "','" + this.minHWEAngleLUserAcc / userRecords + "','" + this.meanHWEAngleLUserAcc / userRecords + "','" + this.maxHWEAngleLUserAcc / userRecords
-                                                        + "','" + this.minWEShAngleLUserAcc / userRecords + "','" + this.meanWEShAngleLUserAcc / userRecords + "','" + this.maxWEShAngleLUserAcc / userRecords 
+                                                        + "','" + this.maxWEShAngleRUserAcc / userRecords
+                                                        +"','" + this.minEShSAngleRUserAcc / userRecords + "','" + this.meanEShSAngleRUserAcc / userRecords
+                                                        + "','" + this.maxEShSAngleRUserAcc / userRecords + 
+                                                        "','" + this.minHWEAngleLUserAcc / userRecords + "','" + this.meanHWEAngleLUserAcc / userRecords + "','" + this.maxHWEAngleLUserAcc / userRecords
+                                                        + "','" + this.minWEShAngleLUserAcc / userRecords + "','" + this.meanWEShAngleLUserAcc / userRecords + "','" + this.maxWEShAngleLUserAcc / userRecords
+                                                        + "','" + this.minEShSAngleLUserAcc / userRecords + "','" + this.meanEShSAngleLUserAcc / userRecords
+                                                        + "','" + this.maxEShSAngleLUserAcc / userRecords 
                                                         + "','" + this.wristRelativeSpineShoulderRxUserAcc / userRecords 
                                                         + "','" + this.elbowRelativeSpineShoulderRxUserAcc / userRecords 
                                                         + "','" + this.wristRelativeSpineShoulderLxUserAcc / userRecords 
@@ -1018,9 +1154,12 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         + "','" + this.elbowRelativeSpineShoulderRzUserAcc / userRecords
                                                         + "','" + this.wristRelativeSpineShoulderLzUserAcc / userRecords
                                                         + "','" + this.elbowRelativeSpineShoulderLzUserAcc / userRecords
-                                                        + "','" + this.wristVelocityUserAcc / userRecords
-                                                        + "','" + this.handVelocityUserAcc / userRecords
-                                                        + "','" + this.wristAccelerationUserAcc / userRecords
+                                                        + "','" + this.wristVelocityUserAccR / userRecords
+                                                        + "','" + this.handVelocityUserAccR / userRecords
+                                                        + "','" + this.wristVelocityUserAccL / userRecords
+                                                        + "','" + this.handVelocityUserAccL / userRecords
+                                                        + "','" + this.wristAccelerationUserAccR / userRecords
+                                                        + "','" + this.wristAccelerationUserAccL / userRecords
                                                         + "')", conn))
                                                 {
                                                     SqlDataReader reader1 = command.ExecuteReader();
@@ -1206,11 +1345,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     joints[JointType.WristLeft].Position,
                                     joints[JointType.ThumbLeft].Position);
 
-
                                 double WEShAngleL = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.WristLeft].Position,
                                     joints[JointType.ElbowLeft].Position,
                                     joints[JointType.ShoulderLeft].Position);
+
+                                double EShSAngleL = HelperMethods.getAngleAtMiddleJoint
+                                    (joints[JointType.ElbowLeft].Position,
+                                    joints[JointType.ShoulderLeft].Position,
+                                    joints[JointType.SpineShoulder].Position);
 
                                 double HWEAngleR = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.ElbowRight].Position,
@@ -1222,11 +1365,18 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     joints[JointType.ElbowRight].Position,
                                     joints[JointType.ShoulderRight].Position);
 
+                                double EShSAngleR = HelperMethods.getAngleAtMiddleJoint
+                                    (joints[JointType.ElbowRight].Position,
+                                    joints[JointType.ShoulderRight].Position,
+                                    joints[JointType.SpineShoulder].Position);
+
                                 this.meanHWEAngleLAcc += HWEAngleL;
                                 this.meanWEShAngleLAcc += WEShAngleL;
+                                this.meanEShSAngleLAcc += EShSAngleL;
 
                                 this.meanHWEAngleRAcc += HWEAngleR;
                                 this.meanWEShAngleRAcc += WEShAngleR;
+                                this.meanEShSAngleRAcc += EShSAngleR;
 
 
                                 if (this.minHWEAngleL > HWEAngleL)
@@ -1247,7 +1397,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.maxHWEAngleR = HWEAngleR;
                                 }
 
-                                if (this.minWEShAngleL > HWEAngleL)
+                                if (this.minWEShAngleL > WEShAngleL)
                                 {
                                     this.minWEShAngleL = WEShAngleL;
                                 }
@@ -1265,20 +1415,49 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.maxWEShAngleR = WEShAngleR;
                                 }
 
+                                if (this.minEShSAngleL > EShSAngleL)
+                                {
+                                    this.minEShSAngleL = EShSAngleL;
+                                }
+                                if (this.maxEShSAngleL < EShSAngleL)
+                                {
+                                    this.maxEShSAngleL = EShSAngleL;
+                                }
+
+                                if (this.minEShSAngleR > EShSAngleR)
+                                {
+                                    this.minEShSAngleR = EShSAngleR;
+                                }
+                                if (this.maxEShSAngleR < EShSAngleR)
+                                {
+                                    this.maxEShSAngleR = EShSAngleR;
+                                }
+
                                 if (frameCounter == 1)
                                 {
-                                    this.wristVelocityAcc = 0;
-                                    this.handVelocityAcc = 0;
-                                    this.oldWristVelocity = 0;
+                                    this.wristVelocityAccR = 0;
+                                    this.handVelocityAccR = 0;
+                                    this.oldWristVelocityR = 0;
+
+                                    this.wristVelocityAccL = 0;
+                                    this.handVelocityAccL = 0;
+                                    this.oldWristVelocityL = 0;
                                 }
                                 else
                                 {
-                                    this.newWristVelocity = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
-                                    this.handVelocityAcc += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
-                                    this.wristVelocityAcc += this.newWristVelocity;
-                                    this.wristAccelerationAcc += HelperMethods.getAcceleration(this.oldWristVelocity, this.newWristVelocity, DateTime.Now - oldFrameTime);
+                                    this.newWristVelocityR = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAccR += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.wristVelocityAccR += this.newWristVelocityR;
+                                    this.wristAccelerationAccR += HelperMethods.getAcceleration(this.oldWristVelocityR, this.newWristVelocityR, DateTime.Now - oldFrameTime);
 
-                                    this.oldWristVelocity = this.newWristVelocity;
+                                    this.oldWristVelocityR = this.newWristVelocityR;
+
+                                    this.newWristVelocityL = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAccL += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.wristVelocityAccL += this.newWristVelocityL;
+                                    this.wristAccelerationAccL += HelperMethods.getAcceleration(this.oldWristVelocityL, this.newWristVelocityL, DateTime.Now - oldFrameTime);
+
+                                    this.oldWristVelocityL = this.newWristVelocityL;
                                 }
 
                                 this.oldFrameTime = DateTime.Now;
@@ -1314,6 +1493,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.meanHWEAngleR = meanHWEAngleRAcc / frameCounter;
                                     this.meanWEShAngleL = meanWEShAngleLAcc / frameCounter;
                                     this.meanWEShAngleR = meanWEShAngleRAcc / frameCounter;
+                                    this.meanEShSAngleL = meanEShSAngleLAcc / frameCounter;
+                                    this.meanEShSAngleR = meanEShSAngleRAcc / frameCounter;
 
                                     this.elbowRelativeSpineShoulderRx = elbowRelativeSpineShoulderRxAcc / frameCounter;
                                     this.wristRelativeSpineShoulderRx = wristRelativeSpineShoulderRxAcc / frameCounter;
@@ -1330,10 +1511,14 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.elbowRelativeSpineShoulderLz = elbowRelativeSpineShoulderLzAcc / frameCounter;
                                     this.wristRelativeSpineShoulderLz = wristRelativeSpineShoulderLzAcc / frameCounter;
 
+                                    this.wristVelocityR = wristVelocityAccR / (frameCounter - 1);
+                                    this.handVelocityR = handVelocityAccR / (frameCounter - 1);
 
-                                    this.wristVelocity = wristVelocityAcc / (frameCounter - 1);
-                                    this.handVelocity = handVelocityAcc / (frameCounter - 1);
-                                    this.wristAcceleration = wristAccelerationAcc / (frameCounter - 1);
+                                    this.wristVelocityL = wristVelocityAccL / (frameCounter - 1);
+                                    this.handVelocityL = handVelocityAccL / (frameCounter - 1);
+
+                                    this.wristAccelerationR = wristAccelerationAccR / (frameCounter - 1);
+                                    this.wristAccelerationL = wristAccelerationAccL / (frameCounter - 1);
 
                                     resetAccumilators();
 
@@ -1355,7 +1540,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                 reader = command.ExecuteReader();
                                                 while (reader.Read())
                                                 {
-                                                    currentError = Math.Sqrt(Math.Pow(Convert.ToDouble(reader["Hand_Length_R"].ToString()) - this.handLengthR, 2) +
+                                                    currentError = Math.Sqrt(
+                                                        Math.Pow(Convert.ToDouble(reader["Hand_Length_R"].ToString()) - this.handLengthR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Upper_Arm_Length_R"].ToString()) - this.upperArmLengthR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Fore_Arm_Length_R"].ToString()) - this.foreArmLengthR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Shoulder_Length_R"].ToString()) - this.shoulderLengthR, 2) +
@@ -1380,19 +1566,26 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         Math.Pow(Convert.ToDouble(reader["Mean_HWE_Ang_R"].ToString()) - this.meanHWEAngleR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Max_HWE_Ang_R"].ToString()) - this.maxHWEAngleR, 2) +
 
-                                                        Math.Pow(Convert.ToDouble(reader["Upper_Arm_Length_R"].ToString()) - this.upperArmLengthR, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Upper_Arm_Length_R"].ToString()) - this.upperArmLengthR, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Upper_Arm_Length_R"].ToString()) - this.upperArmLengthR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Min_WESh_Ang_R"].ToString()) - this.minWEShAngleR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Mean_WESh_Ang_R"].ToString()) - this.meanWEShAngleR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Max_WESh_Ang_R"].ToString()) - this.maxWEShAngleR, 2) +
+
+                                                        Math.Pow(Convert.ToDouble(reader["Min_EShS_Ang_R"].ToString()) - this.minEShSAngleR, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Mean_EShS_Ang_R"].ToString()) - this.meanEShSAngleR, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Max_EShS_Ang_R"].ToString()) - this.maxEShSAngleR, 2)+
+
                                                         Math.Pow(Convert.ToDouble(reader["Min_HWE_Ang_L"].ToString()) - this.minHWEAngleL, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Mean_HWE_Ang_L"].ToString()) - this.meanHWEAngleL, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Max_HWE_Ang_L"].ToString()) - this.maxHWEAngleL, 2) +
+                                                       
                                                         Math.Pow(Convert.ToDouble(reader["Min_WESh_Ang_L"].ToString()) - this.minWEShAngleL, 2) +
-
                                                         Math.Pow(Convert.ToDouble(reader["Mean_WESh_Ang_L"].ToString()) - this.meanWEShAngleL, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Max_WESh_Ang_L"].ToString()) - this.maxWEShAngleL, 2) +
+
+                                                        Math.Pow(Convert.ToDouble(reader["Min_EShS_Ang_L"].ToString()) - this.minEShSAngleL, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Mean_EShS_Ang_L"].ToString()) - this.meanEShSAngleL, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Max_EShS_Ang_L"].ToString()) - this.maxEShSAngleL, 2) +
+
                                                         Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Rx"].ToString()) - this.wristRelativeSpineShoulderRx, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Rx"].ToString()) - this.elbowRelativeSpineShoulderRx, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lx"].ToString()) - this.wristRelativeSpineShoulderLx, 2) +
@@ -1405,9 +1598,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Rz"].ToString()) - this.elbowRelativeSpineShoulderRz, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lz"].ToString()) - this.wristRelativeSpineShoulderLz, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Lz"].ToString()) - this.elbowRelativeSpineShoulderLz, 2) +
-                                                        Math.Pow((Convert.ToDouble(reader["Wrist_Velocity_R"].ToString())) - this.wristVelocity, 2) +
-                                                        Math.Pow((Convert.ToDouble(reader["Hand_Velocity_R"].ToString())) - this.handVelocity, 2)+
-                                                        Math.Pow((Convert.ToDouble(reader["Wrist_Acceleration_R"].ToString())) - this.wristAcceleration, 2)
+                                                        
+                                                        Math.Pow((Convert.ToDouble(reader["Wrist_Velocity_R"].ToString())) - this.wristVelocityR, 2) +
+                                                        Math.Pow((Convert.ToDouble(reader["Hand_Velocity_R"].ToString())) - this.handVelocityR, 2)+
+                                                        Math.Pow((Convert.ToDouble(reader["Wrist_Acceleration_R"].ToString())) - this.wristAccelerationR, 2)+
+
+
+                                                        Math.Pow((Convert.ToDouble(reader["Wrist_Velocity_L"].ToString())) - this.wristVelocityL, 2) +
+                                                        Math.Pow((Convert.ToDouble(reader["Hand_Velocity_L"].ToString())) - this.handVelocityL, 2) +
+                                                        Math.Pow((Convert.ToDouble(reader["Wrist_Acceleration_L"].ToString())) - this.wristAccelerationL, 2)
                                                         );
                                                     if (currentError < minError)
                                                     {
@@ -1427,10 +1626,14 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                     if(reader1.Read())
                                                     {
                                                         MessageBox.Show(reader1["User_Name"].ToString()
-                                                            +"\n Wrist Velocity:"
-                                                            +this.wristVelocity 
-                                                            + "\n Wrist Acceleration:"
-                                                            + this.wristAcceleration);
+                                                            +"\n Wrist Velocity R:"
+                                                            +this.wristVelocityR 
+                                                            + "\n Wrist Acceleration R:"
+                                                            + this.wristAccelerationR 
+                                                            + "\n Wrist Velocity L:"
+                                                            + this.wristVelocityL
+                                                            + "\n Wrist Acceleration L:"
+                                                            + this.wristAccelerationL);
                                                     }
                                                     reader1.Close();
                                                 }
