@@ -14,7 +14,7 @@ using System.Windows.Shapes;
 using System.Data.SqlClient;
 using Microsoft.Kinect;
 using System.Windows.Media.Media3D;
-
+using LibSVMsharp;
 
 namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 {
@@ -30,7 +30,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private BodyFrameReader bodyFrameReader1 = null;
         private string statusText = null;
         private KinectBodyView kinectBodyView = null;
-
+        
         //DB data
         int userId;
         string username = "";
@@ -81,15 +81,29 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double maxWEShAngleL = 0.0;
 
         //relative distances
-        double wristRelativeSpineShoulderR = 0.0;
-        double elbowRelativeSpineShoulderR = 0.0;
+        double wristRelativeSpineShoulderRx = 0.0;
+        double elbowRelativeSpineShoulderRx = 0.0;
 
-        double wristRelativeSpineShoulderL = 0.0;
-        double elbowRelativeSpineShoulderL = 0.0;
+        double wristRelativeSpineShoulderLx = 0.0;
+        double elbowRelativeSpineShoulderLx = 0.0;
 
-        //velocity
+        double wristRelativeSpineShoulderRy = 0.0;
+        double elbowRelativeSpineShoulderRy = 0.0;
+
+        double wristRelativeSpineShoulderLy = 0.0;
+        double elbowRelativeSpineShoulderLy = 0.0;
+
+        double wristRelativeSpineShoulderRz = 0.0;
+        double elbowRelativeSpineShoulderRz = 0.0;
+
+        double wristRelativeSpineShoulderLz = 0.0;
+        double elbowRelativeSpineShoulderLz = 0.0;
+
+
+        //velocity and acceleration
         double wristVelocity = 0.0;
         double handVelocity = 0.0;
+        double wristAcceleration = 0.0;
 
         //accumilators
 
@@ -126,16 +140,31 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double meanWEShAngleLAcc = 0.0;
 
         //relative distances
-        double wristRelativeSpineShoulderRAcc = 0.0;
-        double elbowRelativeSpineShoulderRAcc = 0.0;
+        double wristRelativeSpineShoulderRxAcc = 0.0;
+        double elbowRelativeSpineShoulderRxAcc = 0.0;
 
-        double wristRelativeSpineShoulderLAcc = 0.0;
-        double elbowRelativeSpineShoulderLAcc = 0.0;
+        double wristRelativeSpineShoulderLxAcc = 0.0;
+        double elbowRelativeSpineShoulderLxAcc = 0.0;
+
+        double wristRelativeSpineShoulderRyAcc = 0.0;
+        double elbowRelativeSpineShoulderRyAcc = 0.0;
+
+        double wristRelativeSpineShoulderLyAcc = 0.0;
+        double elbowRelativeSpineShoulderLyAcc = 0.0;
+
+        double wristRelativeSpineShoulderRzAcc = 0.0;
+        double elbowRelativeSpineShoulderRzAcc = 0.0;
+
+        double wristRelativeSpineShoulderLzAcc = 0.0;
+        double elbowRelativeSpineShoulderLzAcc = 0.0;
 
         //velocity
         double wristVelocityAcc = 0.0;
         double handVelocityAcc = 0.0;
+        double wristAccelerationAcc = 0.0;
 
+        double oldWristVelocity = 0.0;
+        double newWristVelocity = 0.0;
 
         //user accumilatiors
 
@@ -174,23 +203,33 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         double meanWEShAngleLUserAcc;
         double maxWEShAngleLUserAcc;
 
-        double wristRelativeSpineShoulderRUserAcc;
-        double elbowRelativeSpineShoulderRUserAcc;
-        double wristRelativeSpineShoulderLUserAcc;
-        double elbowRelativeSpineShoulderLUserAcc;
+        double wristRelativeSpineShoulderRxUserAcc;
+        double elbowRelativeSpineShoulderRxUserAcc;
+        double wristRelativeSpineShoulderLxUserAcc;
+        double elbowRelativeSpineShoulderLxUserAcc;
+
+        double wristRelativeSpineShoulderRyUserAcc;
+        double elbowRelativeSpineShoulderRyUserAcc;
+        double wristRelativeSpineShoulderLyUserAcc;
+        double elbowRelativeSpineShoulderLyUserAcc;
+
+        double wristRelativeSpineShoulderRzUserAcc;
+        double elbowRelativeSpineShoulderRzUserAcc;
+        double wristRelativeSpineShoulderLzUserAcc;
+        double elbowRelativeSpineShoulderLzUserAcc;
 
         double wristVelocityUserAcc;
         double handVelocityUserAcc;
-
-
+        double wristAccelerationUserAcc;
+        
         //counters and flags
         bool uniqueUsername = false;
         int frameCounter = 0;
         bool startClicked = false;
         bool signInStartClicked = false;
-        int startClickedCounter = 10;
+        int startClickedCounter = 5;
 
-        //velocity attr
+        //velocity attributes
         CameraSpacePoint oldWristPos;
         CameraSpacePoint oldHandPos;
         DateTime oldFrameTime;
@@ -214,7 +253,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
         private void resetAccumilators()
         {
-
             this.handLengthRAcc = 0.0;
             this.upperArmLengthRAcc = 0.0;
             this.foreArmLengthRAcc = 0.0;
@@ -247,11 +285,28 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.meanWEShAngleLAcc = 0.0;
 
             //relative distances
-            this.wristRelativeSpineShoulderRAcc = 0.0;
-            this.elbowRelativeSpineShoulderRAcc = 0.0;
+            this.wristRelativeSpineShoulderRxAcc = 0.0;
+            this.elbowRelativeSpineShoulderRxAcc = 0.0;
 
-            this.wristRelativeSpineShoulderLAcc = 0.0;
-            this.elbowRelativeSpineShoulderLAcc = 0.0;
+            this.wristRelativeSpineShoulderLxAcc = 0.0;
+            this.elbowRelativeSpineShoulderLxAcc = 0.0;
+
+            this.wristRelativeSpineShoulderRyAcc = 0.0;
+            this.elbowRelativeSpineShoulderRyAcc = 0.0;
+
+            this.wristRelativeSpineShoulderLyAcc = 0.0;
+            this.elbowRelativeSpineShoulderLyAcc = 0.0;
+
+            this.wristRelativeSpineShoulderRzAcc = 0.0;
+            this.elbowRelativeSpineShoulderRzAcc = 0.0;
+
+            this.wristRelativeSpineShoulderLzAcc = 0.0;
+            this.elbowRelativeSpineShoulderLzAcc = 0.0;
+
+            //velocity
+            this.wristVelocityAcc = 0.0;
+            this.handVelocityAcc = 0.0;
+            this.wristAccelerationAcc = 0.0;
         }
 
         private void resetUserAccumilators()
@@ -292,11 +347,24 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.meanWEShAngleLUserAcc = 0.0;
             this.maxWEShAngleLUserAcc = 0.0;
 
-            this.wristRelativeSpineShoulderRUserAcc = 0.0;
-            this.elbowRelativeSpineShoulderRUserAcc = 0.0;
-            this.wristRelativeSpineShoulderLUserAcc = 0.0;
-            this.elbowRelativeSpineShoulderLUserAcc = 0.0;
+            this.wristRelativeSpineShoulderRxUserAcc = 0.0;
+            this.elbowRelativeSpineShoulderRxUserAcc = 0.0;
+            this.wristRelativeSpineShoulderLxUserAcc = 0.0;
+            this.elbowRelativeSpineShoulderLxUserAcc = 0.0;
 
+            this.wristRelativeSpineShoulderRyUserAcc = 0.0;
+            this.elbowRelativeSpineShoulderRyUserAcc = 0.0;
+            this.wristRelativeSpineShoulderLyUserAcc = 0.0;
+            this.elbowRelativeSpineShoulderLyUserAcc = 0.0;
+
+            this.wristRelativeSpineShoulderRzUserAcc = 0.0;
+            this.elbowRelativeSpineShoulderRzUserAcc = 0.0;
+            this.wristRelativeSpineShoulderLzUserAcc = 0.0;
+            this.elbowRelativeSpineShoulderLzUserAcc = 0.0;
+
+            this.wristVelocityUserAcc = 0.0;
+            this.handVelocityUserAcc = 0.0;
+            this.wristAccelerationUserAcc = 0.0;
         }
 
         private void resetAttributeValues()
@@ -341,51 +409,29 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             this.maxWEShAngleL = 0.0;
 
             //relative distances
-            this.wristRelativeSpineShoulderR = 0.0;
-            this.elbowRelativeSpineShoulderR = 0.0;
+            this.wristRelativeSpineShoulderRx = 0.0;
+            this.elbowRelativeSpineShoulderRx = 0.0;
 
-            this.wristRelativeSpineShoulderL = 0.0;
-            this.elbowRelativeSpineShoulderL = 0.0;
+            this.wristRelativeSpineShoulderLx = 0.0;
+            this.elbowRelativeSpineShoulderLx = 0.0;
 
-        }
 
-        public double getVelocity(CameraSpacePoint previous, CameraSpacePoint current, TimeSpan time)
-        {
-            double distance = getDistanceBetweenJoints(previous,current);
-            double velocity = (distance * 100) / time.TotalMilliseconds;
+            this.wristRelativeSpineShoulderRy = 0.0;
+            this.elbowRelativeSpineShoulderRy = 0.0;
 
-            return velocity;
-        }
+            this.wristRelativeSpineShoulderLy = 0.0;
+            this.elbowRelativeSpineShoulderLy = 0.0;
 
-        public double getDistanceBetweenJoints(CameraSpacePoint a, CameraSpacePoint b)
-        {
-            double result = 0;
-            double xInter = Math.Pow(b.X - a.X, 2);
-            double yInter = Math.Pow(b.Y - a.Y, 2);
-            double zInter = Math.Pow(b.Z - a.Z, 2);
 
-            result = Math.Sqrt(xInter + yInter + zInter);
-            return result;
-        }
+            this.wristRelativeSpineShoulderRz = 0.0;
+            this.elbowRelativeSpineShoulderRz = 0.0;
 
-        public double getAngleBetweenTwoVectors(double vx, double vy, double vz, double ux, double uy, double uz)
-        {
-            double result = 0;
-            Vector3D v = new Vector3D(vx, vy, vz);
-            Vector3D u = new Vector3D(ux, uy, uz);
+            this.wristRelativeSpineShoulderLz = 0.0;
+            this.elbowRelativeSpineShoulderLz = 0.0;
 
-            result = Vector3D.AngleBetween(v, u);
-            return result;
-        }
-
-        public double getAngleAtMiddleJoint(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
-        {
-            double result = 0;
-            Vector3D v = new Vector3D(b.X - a.X, b.Y - a.Y, b.Z - a.Z);
-            Vector3D u = new Vector3D(b.X - c.X, b.Y - c.Y, b.Z - c.Z);
-
-            result = Vector3D.AngleBetween(v, u);
-            return result;
+            this.wristVelocity = 0.0;
+            this.handVelocity = 0.0;
+            this.wristAcceleration = 0.0;
         }
 
         private void username_txtbx_TextChanged(object sender, TextChangedEventArgs e)
@@ -395,7 +441,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
         private void username_txtbx_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
-
             TextBox txt = sender as TextBox;
             if (txt.Text.Equals("Username"))
             {
@@ -406,9 +451,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void register_btn_Click(object sender, RoutedEventArgs e)
         {
             string message = "";
-            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
+            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=GestureAuthenticationDB1;Integrated Security=True;Pooling=False";
             this.frameCounter = 0;
-            this.startClickedCounter = 10;
+            this.startClickedCounter = 5;
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -598,74 +643,94 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
                                 frameCounter += 1;
 
-                                this.handLengthRAcc += getDistanceBetweenJoints(joints[JointType.WristRight].Position,
+                                this.handLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.WristRight].Position,
                                     joints[JointType.HandTipRight].Position);
-                                this.foreArmLengthRAcc += getDistanceBetweenJoints(joints[JointType.ElbowRight].Position,
+                                this.foreArmLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ElbowRight].Position,
                                     joints[JointType.WristRight].Position);
-                                this.upperArmLengthRAcc += getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
+                                this.upperArmLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
                                     joints[JointType.ElbowRight].Position);
-                                this.shoulderLengthRAcc += getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
+                                this.shoulderLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
                                     joints[JointType.SpineShoulder].Position);
-                                this.hipLengthRAcc += getDistanceBetweenJoints(joints[JointType.HipRight].Position,
+                                this.hipLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.HipRight].Position,
                                     joints[JointType.SpineBase].Position);
-                                this.upperLegLengthRAcc += getDistanceBetweenJoints(joints[JointType.HipRight].Position,
+                                this.upperLegLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.HipRight].Position,
                                     joints[JointType.KneeRight].Position);
-                                this.shinLengthRAcc += getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
+                                this.shinLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
                                     joints[JointType.KneeRight].Position);
-                                this.footLengthRAcc += getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
+                                this.footLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
                                     joints[JointType.FootRight].Position);
 
 
-                                this.handLengthLAcc += getDistanceBetweenJoints(joints[JointType.WristLeft].Position,
+                                this.handLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.WristLeft].Position,
                                     joints[JointType.HandTipLeft].Position);
-                                this.foreArmLengthLAcc += getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position,
+                                this.foreArmLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position,
                                     joints[JointType.WristLeft].Position);
-                                this.upperArmLengthLAcc += getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
+                                this.upperArmLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
                                     joints[JointType.ElbowLeft].Position);
-                                this.shoulderLengthLAcc += getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
+                                this.shoulderLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
                                     joints[JointType.SpineShoulder].Position);
-                                this.hipLengthLAcc += getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
+                                this.hipLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
                                     joints[JointType.SpineBase].Position);
-                                this.upperLegLengthLAcc += getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
+                                this.upperLegLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
                                     joints[JointType.KneeLeft].Position);
-                                this.shinLengthLAcc += getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
+                                this.shinLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
                                     joints[JointType.KneeLeft].Position);
-                                this.footLengthLAcc += getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
+                                this.footLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
                                     joints[JointType.FootLeft].Position);
 
-                                this.neckLengthAcc += getDistanceBetweenJoints(joints[JointType.Head].Position,
+                                this.neckLengthAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.Head].Position,
                                     joints[JointType.SpineShoulder].Position);
-                                this.backboneLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
+                                this.backboneLengthAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
                                     joints[JointType.SpineShoulder].Position);
-                                this.lowerBackLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
+                                this.lowerBackLengthAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
                                     joints[JointType.SpineBase].Position);
 
-                                this.wristRelativeSpineShoulderRAcc += getDistanceBetweenJoints(joints[JointType.WristRight].Position,
-                                    joints[JointType.SpineShoulder].Position);
-                                this.elbowRelativeSpineShoulderRAcc += getDistanceBetweenJoints(joints[JointType.ElbowRight].Position,
-                                    joints[JointType.SpineShoulder].Position);
+                                this.wristRelativeSpineShoulderRxAcc += joints[JointType.WristRight].Position.X -
+                                    joints[JointType.SpineShoulder].Position.X;
+                                this.elbowRelativeSpineShoulderRxAcc += joints[JointType.ElbowRight].Position.X -
+                                    joints[JointType.SpineShoulder].Position.X;
 
-                                this.wristRelativeSpineShoulderLAcc += getDistanceBetweenJoints(joints[JointType.WristLeft].Position,
-                                    joints[JointType.SpineShoulder].Position);
-                                this.elbowRelativeSpineShoulderLAcc += getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position,
-                                    joints[JointType.SpineShoulder].Position);
+                                this.wristRelativeSpineShoulderLxAcc += joints[JointType.WristLeft].Position.X -
+                                    joints[JointType.SpineShoulder].Position.X;
+                                this.elbowRelativeSpineShoulderLxAcc += joints[JointType.ElbowLeft].Position.X -
+                                    joints[JointType.SpineShoulder].Position.X;
 
-                                double HWEAngleL = getAngleAtMiddleJoint
+                                this.wristRelativeSpineShoulderRyAcc += joints[JointType.WristRight].Position.Y -
+                                    joints[JointType.SpineShoulder].Position.Y;
+                                this.elbowRelativeSpineShoulderRyAcc += joints[JointType.ElbowRight].Position.Y -
+                                    joints[JointType.SpineShoulder].Position.Y;
+
+                                this.wristRelativeSpineShoulderLyAcc += joints[JointType.WristLeft].Position.Y -
+                                    joints[JointType.SpineShoulder].Position.Y;
+                                this.elbowRelativeSpineShoulderLyAcc += joints[JointType.ElbowLeft].Position.Y -
+                                    joints[JointType.SpineShoulder].Position.Y;
+
+                                this.wristRelativeSpineShoulderRzAcc += joints[JointType.WristRight].Position.Z -
+                                    joints[JointType.SpineShoulder].Position.Z;
+                                this.elbowRelativeSpineShoulderRzAcc += joints[JointType.ElbowRight].Position.Z -
+                                    joints[JointType.SpineShoulder].Position.Z;
+
+                                this.wristRelativeSpineShoulderLzAcc += joints[JointType.WristLeft].Position.Z -
+                                    joints[JointType.SpineShoulder].Position.Z;
+                                this.elbowRelativeSpineShoulderLzAcc += joints[JointType.ElbowLeft].Position.Z -
+                                    joints[JointType.SpineShoulder].Position.Z;
+
+                                double HWEAngleL = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.ElbowLeft].Position,
                                     joints[JointType.WristLeft].Position,
                                     joints[JointType.ThumbLeft].Position);
                                 
-                                double WEShAngleL = getAngleAtMiddleJoint
+                                double WEShAngleL = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.WristLeft].Position,
                                     joints[JointType.ElbowLeft].Position,
                                     joints[JointType.ShoulderLeft].Position);
 
-                                double HWEAngleR = getAngleAtMiddleJoint
+                                double HWEAngleR = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.ElbowRight].Position,
                                     joints[JointType.WristRight].Position,
                                     joints[JointType.ThumbRight].Position);
 
-                                double WEShAngleR = getAngleAtMiddleJoint
+                                double WEShAngleR = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.WristRight].Position,
                                     joints[JointType.ElbowRight].Position,
                                     joints[JointType.ShoulderRight].Position);
@@ -717,18 +782,23 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 {
                                     this.wristVelocityAcc = 0;
                                     this.handVelocityAcc = 0;
+                                    this.oldWristVelocity = 0;
                                 }
                                 else
                                 {
-                                    this.wristVelocityAcc = getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, oldFrameTime - DateTime.Now);
-                                    this.handVelocityAcc = getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, oldFrameTime - DateTime.Now);
+                                    this.newWristVelocity = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAcc += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.wristVelocityAcc += this.newWristVelocity;
+                                    this.wristAccelerationAcc += HelperMethods.getAcceleration(this.oldWristVelocity, this.newWristVelocity, DateTime.Now - oldFrameTime);
+
+                                    this.oldWristVelocity = this.newWristVelocity;
                                 }
 
                                 this.oldFrameTime = DateTime.Now;
                                 this.oldWristPos = joints[JointType.WristRight].Position;
                                 this.oldHandPos = joints[JointType.HandRight].Position;
 
-                                if (((DateTime.Now) - startFrameTime).Seconds == 5 && !inserted)
+                                if (((DateTime.Now) - startFrameTime).Seconds == 3 && !inserted)
                                 {
                                     inserted = true;
                                     this.handLengthR = handLengthRAcc / frameCounter;
@@ -758,18 +828,30 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.meanWEShAngleL = meanWEShAngleLAcc / frameCounter;
                                     this.meanWEShAngleR = meanWEShAngleRAcc / frameCounter;
 
-                                    this.elbowRelativeSpineShoulderR = elbowRelativeSpineShoulderRAcc / frameCounter;
-                                    this.wristRelativeSpineShoulderR = wristRelativeSpineShoulderRAcc / frameCounter;
-                                    this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / frameCounter;
-                                    this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderRx = elbowRelativeSpineShoulderRxAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderRx = wristRelativeSpineShoulderRxAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderLx = elbowRelativeSpineShoulderLxAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderLx = wristRelativeSpineShoulderLxAcc / frameCounter;
 
-                                    this.wristVelocity = wristVelocityAcc / (frameCounter - 1);
-                                    this.handVelocity = handVelocityAcc / (frameCounter - 1);
+                                    this.elbowRelativeSpineShoulderRy = elbowRelativeSpineShoulderRyAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderRy = wristRelativeSpineShoulderRyAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderLy = elbowRelativeSpineShoulderLyAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderLy = wristRelativeSpineShoulderLyAcc / frameCounter;
+
+                                    this.elbowRelativeSpineShoulderRz = elbowRelativeSpineShoulderRzAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderRz = wristRelativeSpineShoulderRzAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderLz = elbowRelativeSpineShoulderLzAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderLz = wristRelativeSpineShoulderLzAcc / frameCounter;
+
+                                    this.wristVelocity = (wristVelocityAcc / (frameCounter - 1));
+                                    this.handVelocity = (handVelocityAcc / (frameCounter - 1));
+
+                                    this.wristAcceleration = (wristAccelerationAcc / (frameCounter - 1));
 
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=GestureAuthenticationDB1;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -820,12 +902,21 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         "','" + this.meanHWEAngleL + "','" + this.maxHWEAngleL +
                                                         "','" + this.minWEShAngleL + "','" + this.meanWEShAngleL +
                                                         "','" + this.maxWEShAngleL + 
-                                                        "','" + this.wristRelativeSpineShoulderR *100 +
-                                                        "','" + this.elbowRelativeSpineShoulderR *100 + 
-                                                        "','" + this.wristRelativeSpineShoulderL * 100 +
-                                                        "','" + this.elbowRelativeSpineShoulderL * 100 +
+                                                        "','" + this.wristRelativeSpineShoulderRx *100 +
+                                                        "','" + this.elbowRelativeSpineShoulderRx *100 + 
+                                                        "','" + this.wristRelativeSpineShoulderLx * 100 +
+                                                        "','" + this.elbowRelativeSpineShoulderLx * 100 +
+                                                        "','" + this.wristRelativeSpineShoulderRy * 100 +
+                                                        "','" + this.elbowRelativeSpineShoulderRy * 100 +
+                                                        "','" + this.wristRelativeSpineShoulderLy * 100 +
+                                                        "','" + this.elbowRelativeSpineShoulderLy * 100 +
+                                                        "','" + this.wristRelativeSpineShoulderRz * 100 +
+                                                        "','" + this.elbowRelativeSpineShoulderRz * 100 +
+                                                        "','" + this.wristRelativeSpineShoulderLz * 100 +
+                                                        "','" + this.elbowRelativeSpineShoulderLz * 100 +
                                                         "','" + this.wristVelocity +
-                                                        "','" + this.handVelocity + "')", conn))
+                                                        "','" + this.handVelocity +
+                                                        "','" + this.wristAcceleration + "')", conn))
                                                 {
                                                     SqlDataReader reader = command.ExecuteReader();
                                                     reader.Close();
@@ -879,13 +970,22 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         this.minWEShAngleLUserAcc += Convert.ToDouble(reader["Min_WESh_Ang_L"].ToString());
                                                         this.meanWEShAngleLUserAcc += Convert.ToDouble(reader["Mean_WESh_Ang_L"].ToString());
                                                         this.maxWEShAngleLUserAcc += Convert.ToDouble(reader["Max_WESh_Ang_L"].ToString());
-                                                        this.wristRelativeSpineShoulderRUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_R"].ToString());
-                                                        this.elbowRelativeSpineShoulderRUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_R"].ToString());
-                                                        this.wristRelativeSpineShoulderLUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_L"].ToString());
-                                                        this.elbowRelativeSpineShoulderLUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_L"].ToString());
+                                                        this.wristRelativeSpineShoulderRxUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Rx"].ToString());
+                                                        this.elbowRelativeSpineShoulderRxUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Rx"].ToString());
+                                                        this.wristRelativeSpineShoulderLxUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lx"].ToString());
+                                                        this.elbowRelativeSpineShoulderLxUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Lx"].ToString());
+                                                        this.wristRelativeSpineShoulderRyUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Ry"].ToString());
+                                                        this.elbowRelativeSpineShoulderRyUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Ry"].ToString());
+                                                        this.wristRelativeSpineShoulderLyUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Ly"].ToString());
+                                                        this.elbowRelativeSpineShoulderLyUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Ly"].ToString());
+                                                        this.wristRelativeSpineShoulderRzUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Rz"].ToString());
+                                                        this.elbowRelativeSpineShoulderRzUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Rz"].ToString());
+                                                        this.wristRelativeSpineShoulderLzUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lz"].ToString());
+                                                        this.elbowRelativeSpineShoulderLzUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Lx"].ToString());
 
                                                         this.wristVelocityUserAcc += Convert.ToDouble(reader["Wrist_Velocity_R"].ToString());
                                                         this.handVelocityUserAcc += Convert.ToDouble(reader["Hand_Velocity_R"].ToString());
+                                                        this.wristAccelerationUserAcc += Convert.ToDouble(reader["Wrist_Acceleration_R"].ToString());
                                                     }
                                                     reader.Close();
 
@@ -905,12 +1005,22 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         + "','" + this.upperLegLengthRUserAcc / userRecords + "','" + this.shinLengthRUserAcc / userRecords + "','" + this.footLengthRUserAcc / userRecords + "','" + this. hipLengthLUserAcc / userRecords + "','" + this.upperLegLengthLUserAcc / userRecords + "','" + this.shinLengthLUserAcc / userRecords
                                                         + "','" + this.footLengthLUserAcc / userRecords + "','" + this.minHWEAngleRUserAcc / userRecords + "','" + this.meanHWEAngleRUserAcc / userRecords + "','" + this.maxHWEAngleRUserAcc / userRecords + "','" + this.minWEShAngleRUserAcc / userRecords + "','" + this.meanWEShAngleRUserAcc / userRecords
                                                         + "','" + this.maxWEShAngleRUserAcc / userRecords + "','" + this.minHWEAngleLUserAcc / userRecords + "','" + this.meanHWEAngleLUserAcc / userRecords + "','" + this.maxHWEAngleLUserAcc / userRecords
-                                                        + "','" + this.minWEShAngleLUserAcc / userRecords + "','" + this.meanWEShAngleLUserAcc / userRecords + "','" + this.maxWEShAngleLUserAcc / userRecords + "','" + this.wristRelativeSpineShoulderRUserAcc / userRecords 
-                                                        + "','" + this.elbowRelativeSpineShoulderRUserAcc / userRecords 
-                                                        + "','" + this.wristRelativeSpineShoulderLUserAcc / userRecords 
-                                                        + "','" + this.elbowRelativeSpineShoulderLUserAcc / userRecords
+                                                        + "','" + this.minWEShAngleLUserAcc / userRecords + "','" + this.meanWEShAngleLUserAcc / userRecords + "','" + this.maxWEShAngleLUserAcc / userRecords 
+                                                        + "','" + this.wristRelativeSpineShoulderRxUserAcc / userRecords 
+                                                        + "','" + this.elbowRelativeSpineShoulderRxUserAcc / userRecords 
+                                                        + "','" + this.wristRelativeSpineShoulderLxUserAcc / userRecords 
+                                                        + "','" + this.elbowRelativeSpineShoulderLxUserAcc / userRecords
+                                                        + "','" + this.wristRelativeSpineShoulderRyUserAcc / userRecords
+                                                        + "','" + this.elbowRelativeSpineShoulderRyUserAcc / userRecords
+                                                        + "','" + this.wristRelativeSpineShoulderLyUserAcc / userRecords
+                                                        + "','" + this.elbowRelativeSpineShoulderLyUserAcc / userRecords
+                                                        + "','" + this.wristRelativeSpineShoulderRzUserAcc / userRecords
+                                                        + "','" + this.elbowRelativeSpineShoulderRzUserAcc / userRecords
+                                                        + "','" + this.wristRelativeSpineShoulderLzUserAcc / userRecords
+                                                        + "','" + this.elbowRelativeSpineShoulderLzUserAcc / userRecords
                                                         + "','" + this.wristVelocityUserAcc / userRecords
                                                         + "','" + this.handVelocityUserAcc / userRecords
+                                                        + "','" + this.wristAccelerationUserAcc / userRecords
                                                         + "')", conn))
                                                 {
                                                     SqlDataReader reader1 = command.ExecuteReader();
@@ -990,10 +1100,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                         // creates an array of 6 bodies, which is the max number of bodies that Kinect can track simultaneously
                         this.bodies = new Body[bodyFrame.BodyCount];
                     }
-
-                    // The first time GetAndRefreshBodyData is called, Kinect will allocate each Body in the array.
-                    // As long as those body objects are not disposed and not set to null in the array,
-                    // those body objects will be re-used.
+                    
                     bodyFrame.GetAndRefreshBodyData(this.bodies);
                     dataReceived = true;
                 }
@@ -1023,75 +1130,94 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
                                 frameCounter += 1;
 
-                                this.handLengthRAcc += getDistanceBetweenJoints(joints[JointType.WristRight].Position,
+                                this.handLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.WristRight].Position,
                                     joints[JointType.HandTipRight].Position);
-                                this.foreArmLengthRAcc += getDistanceBetweenJoints(joints[JointType.ElbowRight].Position,
+                                this.foreArmLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ElbowRight].Position,
                                     joints[JointType.WristRight].Position);
-                                this.upperArmLengthRAcc += getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
+                                this.upperArmLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
                                     joints[JointType.ElbowRight].Position);
-                                this.shoulderLengthRAcc += getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
+                                this.shoulderLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ShoulderRight].Position,
                                     joints[JointType.SpineShoulder].Position);
-                                this.hipLengthRAcc += getDistanceBetweenJoints(joints[JointType.HipRight].Position,
+                                this.hipLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.HipRight].Position,
                                     joints[JointType.SpineBase].Position);
-                                this.upperLegLengthRAcc += getDistanceBetweenJoints(joints[JointType.HipRight].Position,
+                                this.upperLegLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.HipRight].Position,
                                     joints[JointType.KneeRight].Position);
-                                this.shinLengthRAcc += getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
+                                this.shinLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
                                     joints[JointType.KneeRight].Position);
-                                this.footLengthRAcc += getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
+                                this.footLengthRAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.AnkleRight].Position,
                                     joints[JointType.FootRight].Position);
 
 
-                                this.handLengthLAcc += getDistanceBetweenJoints(joints[JointType.WristLeft].Position,
+                                this.handLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.WristLeft].Position,
                                     joints[JointType.HandTipLeft].Position);
-                                this.foreArmLengthLAcc += getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position,
+                                this.foreArmLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position,
                                     joints[JointType.WristLeft].Position);
-                                this.upperArmLengthLAcc += getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
+                                this.upperArmLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
                                     joints[JointType.ElbowLeft].Position);
-                                this.shoulderLengthLAcc += getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
+                                this.shoulderLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.ShoulderLeft].Position,
                                     joints[JointType.SpineShoulder].Position);
-                                this.hipLengthLAcc += getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
+                                this.hipLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
                                     joints[JointType.SpineBase].Position);
-                                this.upperLegLengthLAcc += getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
+                                this.upperLegLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.HipLeft].Position,
                                     joints[JointType.KneeLeft].Position);
-                                this.shinLengthLAcc += getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
+                                this.shinLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
                                     joints[JointType.KneeLeft].Position);
-                                this.footLengthLAcc += getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
+                                this.footLengthLAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.AnkleLeft].Position,
                                     joints[JointType.FootLeft].Position);
 
-                                this.neckLengthAcc += getDistanceBetweenJoints(joints[JointType.Head].Position,
+                                this.neckLengthAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.Head].Position,
                                     joints[JointType.SpineShoulder].Position);
-                                this.backboneLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
+                                this.backboneLengthAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
                                     joints[JointType.SpineShoulder].Position);
-                                this.lowerBackLengthAcc += getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
+                                this.lowerBackLengthAcc += HelperMethods.getDistanceBetweenJoints(joints[JointType.SpineMid].Position,
                                     joints[JointType.SpineBase].Position);
+                                this.wristRelativeSpineShoulderRxAcc += joints[JointType.WristRight].Position.X -
+                                                                   joints[JointType.SpineShoulder].Position.X;
+                                this.elbowRelativeSpineShoulderRxAcc += joints[JointType.ElbowRight].Position.X -
+                                    joints[JointType.SpineShoulder].Position.X;
 
-                                this.wristRelativeSpineShoulderRAcc += getDistanceBetweenJoints(joints[JointType.WristRight].Position,
-                                    joints[JointType.SpineShoulder].Position);
-                                this.elbowRelativeSpineShoulderRAcc += getDistanceBetweenJoints(joints[JointType.ElbowRight].Position,
-                                    joints[JointType.SpineShoulder].Position);
+                                this.wristRelativeSpineShoulderLxAcc += joints[JointType.WristLeft].Position.X -
+                                    joints[JointType.SpineShoulder].Position.X;
+                                this.elbowRelativeSpineShoulderLxAcc += joints[JointType.ElbowLeft].Position.X -
+                                    joints[JointType.SpineShoulder].Position.X;
 
-                                this.wristRelativeSpineShoulderLAcc += getDistanceBetweenJoints(joints[JointType.WristLeft].Position,
-                                    joints[JointType.SpineShoulder].Position);
-                                this.elbowRelativeSpineShoulderLAcc += getDistanceBetweenJoints(joints[JointType.ElbowLeft].Position,
-                                    joints[JointType.SpineShoulder].Position);
+                                this.wristRelativeSpineShoulderRyAcc += joints[JointType.WristRight].Position.Y -
+                                    joints[JointType.SpineShoulder].Position.Y;
+                                this.elbowRelativeSpineShoulderRyAcc += joints[JointType.ElbowRight].Position.Y -
+                                    joints[JointType.SpineShoulder].Position.Y;
 
-                                double HWEAngleL = getAngleAtMiddleJoint
+                                this.wristRelativeSpineShoulderLyAcc += joints[JointType.WristLeft].Position.Y -
+                                    joints[JointType.SpineShoulder].Position.Y;
+                                this.elbowRelativeSpineShoulderLyAcc += joints[JointType.ElbowLeft].Position.Y -
+                                    joints[JointType.SpineShoulder].Position.Y;
+
+                                this.wristRelativeSpineShoulderRzAcc += joints[JointType.WristRight].Position.Z -
+                                    joints[JointType.SpineShoulder].Position.Z;
+                                this.elbowRelativeSpineShoulderRzAcc += joints[JointType.ElbowRight].Position.Z -
+                                    joints[JointType.SpineShoulder].Position.Z;
+
+                                this.wristRelativeSpineShoulderLzAcc += joints[JointType.WristLeft].Position.Z -
+                                    joints[JointType.SpineShoulder].Position.Z;
+                                this.elbowRelativeSpineShoulderLzAcc += joints[JointType.ElbowLeft].Position.Z -
+                                    joints[JointType.SpineShoulder].Position.Z;
+
+                                double HWEAngleL = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.ElbowLeft].Position,
                                     joints[JointType.WristLeft].Position,
                                     joints[JointType.ThumbLeft].Position);
 
 
-                                double WEShAngleL = getAngleAtMiddleJoint
+                                double WEShAngleL = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.WristLeft].Position,
                                     joints[JointType.ElbowLeft].Position,
                                     joints[JointType.ShoulderLeft].Position);
 
-                                double HWEAngleR = getAngleAtMiddleJoint
+                                double HWEAngleR = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.ElbowRight].Position,
                                     joints[JointType.WristRight].Position,
                                     joints[JointType.ThumbRight].Position);
 
-                                double WEShAngleR = getAngleAtMiddleJoint
+                                double WEShAngleR = HelperMethods.getAngleAtMiddleJoint
                                     (joints[JointType.WristRight].Position,
                                     joints[JointType.ElbowRight].Position,
                                     joints[JointType.ShoulderRight].Position);
@@ -1143,18 +1269,23 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 {
                                     this.wristVelocityAcc = 0;
                                     this.handVelocityAcc = 0;
+                                    this.oldWristVelocity = 0;
                                 }
                                 else
                                 {
-                                    this.wristVelocityAcc = getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, oldFrameTime - DateTime.Now);
-                                    this.handVelocityAcc = getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, oldFrameTime - DateTime.Now);
+                                    this.newWristVelocity = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAcc += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.wristVelocityAcc += this.newWristVelocity;
+                                    this.wristAccelerationAcc += HelperMethods.getAcceleration(this.oldWristVelocity, this.newWristVelocity, DateTime.Now - oldFrameTime);
+
+                                    this.oldWristVelocity = this.newWristVelocity;
                                 }
 
                                 this.oldFrameTime = DateTime.Now;
                                 this.oldWristPos = joints[JointType.WristRight].Position;
                                 this.oldHandPos = joints[JointType.HandRight].Position;
 
-                                if (((DateTime.Now) - signInStartFrameTime).Seconds == 5 && !compared)
+                                if (((DateTime.Now) - signInStartFrameTime).Seconds == 3 && !compared)
                                 {
                                     compared = true;
                                     this.handLengthR = handLengthRAcc / frameCounter;
@@ -1184,19 +1315,30 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.meanWEShAngleL = meanWEShAngleLAcc / frameCounter;
                                     this.meanWEShAngleR = meanWEShAngleRAcc / frameCounter;
 
-                                    this.elbowRelativeSpineShoulderR = elbowRelativeSpineShoulderRAcc / frameCounter;
-                                    this.wristRelativeSpineShoulderR = wristRelativeSpineShoulderRAcc / frameCounter;
-                                    this.elbowRelativeSpineShoulderL = elbowRelativeSpineShoulderLAcc / frameCounter;
-                                    this.wristRelativeSpineShoulderL = wristRelativeSpineShoulderLAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderRx = elbowRelativeSpineShoulderRxAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderRx = wristRelativeSpineShoulderRxAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderLx = elbowRelativeSpineShoulderLxAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderLx = wristRelativeSpineShoulderLxAcc / frameCounter;
+
+                                    this.elbowRelativeSpineShoulderRy = elbowRelativeSpineShoulderRyAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderRy = wristRelativeSpineShoulderRyAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderLy = elbowRelativeSpineShoulderLyAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderLy = wristRelativeSpineShoulderLyAcc / frameCounter;
+
+                                    this.elbowRelativeSpineShoulderRz = elbowRelativeSpineShoulderRzAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderRz = wristRelativeSpineShoulderRzAcc / frameCounter;
+                                    this.elbowRelativeSpineShoulderLz = elbowRelativeSpineShoulderLzAcc / frameCounter;
+                                    this.wristRelativeSpineShoulderLz = wristRelativeSpineShoulderLzAcc / frameCounter;
 
 
                                     this.wristVelocity = wristVelocityAcc / (frameCounter - 1);
                                     this.handVelocity = handVelocityAcc / (frameCounter - 1);
+                                    this.wristAcceleration = wristAccelerationAcc / (frameCounter - 1);
 
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=BachelorProject;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=GestureAuthenticationDB1;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1224,7 +1366,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         Math.Pow(Convert.ToDouble(reader["Neck_Length"].ToString()) - this.neckLength, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Backbone_Length"].ToString()) - this.backboneLength, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Lower_Back_Length"].ToString()) - this.lowerBackLength, 2) +
-                                                       
+
                                                         //Math.Pow(Convert.ToDouble(reader["Hip_Length_R"].ToString()) - this.hipLengthR, 2) +
                                                         //Math.Pow(Convert.ToDouble(reader["Upper_Leg_Length_R"].ToString()) - this.upperLegLengthR, 2) +
                                                         //Math.Pow(Convert.ToDouble(reader["Shin_Length_R"].ToString()) - this.shinLengthR, 2) +
@@ -1233,7 +1375,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         //Math.Pow(Convert.ToDouble(reader["Upper_Leg_Length_L"].ToString()) - this.upperLegLengthL, 2) +
                                                         //Math.Pow(Convert.ToDouble(reader["Shin_Length_L"].ToString()) - this.shinLengthL, 2) +
                                                         //Math.Pow(Convert.ToDouble(reader["Foot_Length_L"].ToString()) - this.footLengthL, 2) +
-                                                       
+
                                                         Math.Pow(Convert.ToDouble(reader["Min_HWE_Ang_R"].ToString()) - this.minHWEAngleR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Mean_HWE_Ang_R"].ToString()) - this.meanHWEAngleR, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Max_HWE_Ang_R"].ToString()) - this.maxHWEAngleR, 2) +
@@ -1251,12 +1393,21 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
                                                         Math.Pow(Convert.ToDouble(reader["Mean_WESh_Ang_L"].ToString()) - this.meanWEShAngleL, 2) +
                                                         Math.Pow(Convert.ToDouble(reader["Max_WESh_Ang_L"].ToString()) - this.maxWEShAngleL, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_R"].ToString()) - this.wristRelativeSpineShoulderR, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_R"].ToString()) - this.elbowRelativeSpineShoulderR, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_L"].ToString()) - this.wristRelativeSpineShoulderL, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_L"].ToString()) - this.elbowRelativeSpineShoulderL, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Velocity_R"].ToString()) - this.wristVelocity, 2) +
-                                                        Math.Pow(Convert.ToDouble(reader["Hand_Velocity_R"].ToString()) - this.handVelocity, 2)
+                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Rx"].ToString()) - this.wristRelativeSpineShoulderRx, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Rx"].ToString()) - this.elbowRelativeSpineShoulderRx, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lx"].ToString()) - this.wristRelativeSpineShoulderLx, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Lx"].ToString()) - this.elbowRelativeSpineShoulderLx, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Ry"].ToString()) - this.wristRelativeSpineShoulderRy, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Ry"].ToString()) - this.elbowRelativeSpineShoulderRy, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Ly"].ToString()) - this.wristRelativeSpineShoulderLy, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Ly"].ToString()) - this.elbowRelativeSpineShoulderLy, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Rz"].ToString()) - this.wristRelativeSpineShoulderRz, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Rz"].ToString()) - this.elbowRelativeSpineShoulderRz, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lz"].ToString()) - this.wristRelativeSpineShoulderLz, 2) +
+                                                        Math.Pow(Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Lz"].ToString()) - this.elbowRelativeSpineShoulderLz, 2) +
+                                                        Math.Pow((Convert.ToDouble(reader["Wrist_Velocity_R"].ToString())) - this.wristVelocity, 2) +
+                                                        Math.Pow((Convert.ToDouble(reader["Hand_Velocity_R"].ToString())) - this.handVelocity, 2)+
+                                                        Math.Pow((Convert.ToDouble(reader["Wrist_Acceleration_R"].ToString())) - this.wristAcceleration, 2)
                                                         );
                                                     if (currentError < minError)
                                                     {
@@ -1275,7 +1426,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                     reader1 = command.ExecuteReader();
                                                     if(reader1.Read())
                                                     {
-                                                        MessageBox.Show(reader1["User_Name"].ToString());
+                                                        MessageBox.Show(reader1["User_Name"].ToString()
+                                                            +"\n Wrist Velocity:"
+                                                            +this.wristVelocity 
+                                                            + "\n Wrist Acceleration:"
+                                                            + this.wristAcceleration);
                                                     }
                                                     reader1.Close();
                                                 }
@@ -1293,14 +1448,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.bodyFrameReader1.FrameArrived -= this.signIn_Reader_BodyFrameArrived;
                                     this.bodyFrameReader1.Dispose();
                                     this.bodyFrameReader1 = null;
+
+                                    signInStart_btn.Visibility = Visibility.Visible;
+                                    notRegistered_btn.Visibility = Visibility.Visible;
                                 }
                            }
                         }
                     }
                 }
             }
-        }
-
-                                
+        }                        
     }
 }

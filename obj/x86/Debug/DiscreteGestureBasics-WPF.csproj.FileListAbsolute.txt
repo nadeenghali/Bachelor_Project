@@ -22,3 +22,5 @@ C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\DiscreteGestureBasics-WPF.exe
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\DiscreteGestureBasics-WPF.pdb
 C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\obj\x86\Debug\DiscreteGestureBasics-WPF.csprojResolveAssemblyReference.cache
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\LibSVMsharp.dll
+C:\Users\Nadeen\Documents\Visual Studio 2015\Projects\DiscreteGestureBasics-WPF\bin\x86\Debug\LibSVMsharp.pdb
