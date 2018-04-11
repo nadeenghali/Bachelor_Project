@@ -120,8 +120,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 value = value.Replace("\n", "");
                             }
                         }
-                        row += value;
-                        if (index < columns - 1)
+                        if (index > 2)
+                        {
+                            row += (index-2) + ":" + value;
+                        }
+                        else if(index == 2)
+                        {
+                            row += value;
+                        }
+                        if (index < columns - 1 && index >= 2)
                             row += separator;
                     }
                     dataTable.Rows[rowIndex][columns - 1].ToString().ToString().Replace(separator, " ");

@@ -264,8 +264,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         int startClickedCounter = 5;
 
         //velocity attributes
-        CameraSpacePoint oldWristPos;
-        CameraSpacePoint oldHandPos;
+        CameraSpacePoint oldWristPosR;
+        CameraSpacePoint oldHandPosR;
+
+
+        CameraSpacePoint oldWristPosL;
+        CameraSpacePoint oldHandPosL;
+
         DateTime oldFrameTime;
 
         public MyApp()
@@ -516,7 +521,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void register_btn_Click(object sender, RoutedEventArgs e)
         {
             string message = "";
-            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=GestureAuthenticationDB1;Integrated Security=True;Pooling=False";
+            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=DifferentGestures;Integrated Security=True;Pooling=False";
             this.frameCounter = 0;
             this.startClickedCounter = 5;
             try
@@ -563,6 +568,20 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                             {
                                 SqlDataReader reader1 = command1.ExecuteReader();
                                 reader1.Close();
+                            }
+
+                            using (SqlCommand command1 = new SqlCommand
+                            ("Select * from Templates", conn))
+                            {
+                                using (SqlDataReader reader = command1.ExecuteReader())
+                                {
+                                    while (reader.Read())
+                                    {
+                                        MessageBox.Show(HelperMethods.ReaderToCSV(reader, false, " "));
+                                    }
+
+                                    reader.Close();
+                                }
                             }
                         }
                         catch (Exception ex0)
@@ -855,13 +874,13 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.maxWEShAngleR = WEShAngleR;
                                 }
 
-                                if (this.minWEShAngleL > HWEAngleL)
+                                if (this.minEShSAngleL > EShSAngleL)
                                 {
-                                    this.minWEShAngleL = WEShAngleL;
+                                    this.minEShSAngleL = EShSAngleL;
                                 }
-                                if (this.maxWEShAngleL < WEShAngleL)
+                                if (this.maxEShSAngleL < EShSAngleL)
                                 {
-                                    this.maxWEShAngleL = WEShAngleL;
+                                    this.maxEShSAngleL = EShSAngleL;
                                 }
 
                                 if (this.minEShSAngleR > EShSAngleR)
@@ -878,22 +897,24 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.wristVelocityAccR = 0;
                                     this.handVelocityAccR = 0;
                                     this.oldWristVelocityR = 0;
+                                    this.newWristVelocityL = 0;
 
                                     this.wristVelocityAccL = 0;
                                     this.handVelocityAccL = 0;
                                     this.oldWristVelocityL = 0;
+                                    this.newWristVelocityL = 0;
                                 }
                                 else
                                 {
-                                    this.newWristVelocityR = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
-                                    this.handVelocityAccR += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.newWristVelocityR = HelperMethods.getVelocity(this.oldWristPosR, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAccR += HelperMethods.getVelocity(this.oldHandPosR, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
                                     this.wristVelocityAccR += this.newWristVelocityR;
                                     this.wristAccelerationAccR += HelperMethods.getAcceleration(this.oldWristVelocityR, this.newWristVelocityR, DateTime.Now - oldFrameTime);
 
                                     this.oldWristVelocityR = this.newWristVelocityR;
 
-                                    this.newWristVelocityL = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
-                                    this.handVelocityAccL += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.newWristVelocityL = HelperMethods.getVelocity(this.oldWristPosL, joints[JointType.WristLeft].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAccL += HelperMethods.getVelocity(this.oldHandPosL, joints[JointType.HandLeft].Position, DateTime.Now - oldFrameTime);
                                     this.wristVelocityAccL += this.newWristVelocityL;
                                     this.wristAccelerationAccL += HelperMethods.getAcceleration(this.oldWristVelocityL, this.newWristVelocityL, DateTime.Now - oldFrameTime);
 
@@ -901,8 +922,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 }
 
                                 this.oldFrameTime = DateTime.Now;
-                                this.oldWristPos = joints[JointType.WristRight].Position;
-                                this.oldHandPos = joints[JointType.HandRight].Position;
+                                this.oldWristPosR = joints[JointType.WristRight].Position;
+                                this.oldHandPosR = joints[JointType.HandRight].Position;
+                                
+                                this.oldWristPosL = joints[JointType.WristLeft].Position;
+                                this.oldHandPosL = joints[JointType.HandLeft].Position;
 
                                 if (((DateTime.Now) - startFrameTime).Seconds == 3 && !inserted)
                                 {
@@ -964,7 +988,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=GestureAuthenticationDB1;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=DifferentGestures;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1444,15 +1468,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 }
                                 else
                                 {
-                                    this.newWristVelocityR = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
-                                    this.handVelocityAccR += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.newWristVelocityR = HelperMethods.getVelocity(this.oldWristPosR, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAccR += HelperMethods.getVelocity(this.oldHandPosR, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
                                     this.wristVelocityAccR += this.newWristVelocityR;
                                     this.wristAccelerationAccR += HelperMethods.getAcceleration(this.oldWristVelocityR, this.newWristVelocityR, DateTime.Now - oldFrameTime);
 
                                     this.oldWristVelocityR = this.newWristVelocityR;
 
-                                    this.newWristVelocityL = HelperMethods.getVelocity(this.oldWristPos, joints[JointType.WristRight].Position, DateTime.Now - oldFrameTime);
-                                    this.handVelocityAccL += HelperMethods.getVelocity(this.oldHandPos, joints[JointType.HandRight].Position, DateTime.Now - oldFrameTime);
+                                    this.newWristVelocityL = HelperMethods.getVelocity(this.oldWristPosL, joints[JointType.WristLeft].Position, DateTime.Now - oldFrameTime);
+                                    this.handVelocityAccL += HelperMethods.getVelocity(this.oldHandPosL, joints[JointType.HandLeft].Position, DateTime.Now - oldFrameTime);
                                     this.wristVelocityAccL += this.newWristVelocityL;
                                     this.wristAccelerationAccL += HelperMethods.getAcceleration(this.oldWristVelocityL, this.newWristVelocityL, DateTime.Now - oldFrameTime);
 
@@ -1460,8 +1484,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 }
 
                                 this.oldFrameTime = DateTime.Now;
-                                this.oldWristPos = joints[JointType.WristRight].Position;
-                                this.oldHandPos = joints[JointType.HandRight].Position;
+                                this.oldWristPosR = joints[JointType.WristRight].Position;
+                                this.oldHandPosR = joints[JointType.HandRight].Position;
+
+                                this.oldWristPosL = joints[JointType.WristLeft].Position;
+                                this.oldHandPosL = joints[JointType.HandLeft].Position;
 
                                 if (((DateTime.Now) - signInStartFrameTime).Seconds == 3 && !compared)
                                 {
@@ -1522,7 +1549,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=GestureAuthenticationDB1;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=DifferentGestures;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1617,7 +1644,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                 reader.Close();
                                             }
 
-                                            if (minError < 150)
+                                            if (minError < 220)
                                             {
                                                 using (SqlCommand command = new SqlCommand("SELECT * FROM Users WHERE Id=" + currentId, conn))
                                                 {
