@@ -720,7 +720,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                             if (body.IsTracked)
                             {
 
-                                System.Diagnostics.Debug.WriteLine("body frame triggered");
+                                //System.Diagnostics.Debug.WriteLine("body frame triggered");
                                 IReadOnlyDictionary<JointType, Joint> joints = body.Joints;
                                 // convert the joint points to depth (display) space
                                 Dictionary<JointType, Point> jointPoints = new Dictionary<JointType, Point>();
