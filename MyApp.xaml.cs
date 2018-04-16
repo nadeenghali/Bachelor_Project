@@ -34,6 +34,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         //DB data
         int userId;
         string username = "";
+        string gestureName = "";
+        int gestureId;
         int sessionId;
         DateTime startFrameTime;
         DateTime signInStartFrameTime;
@@ -288,6 +290,21 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             enter_label.Visibility = Visibility.Hidden;
             notRegistered_btn.Visibility = Visibility.Hidden;
             start_btn.Visibility = Visibility.Hidden;
+
+            gestureComboBox.Items.Add("1HUr");
+            gestureComboBox.Items.Add("1HUl");
+            gestureComboBox.Items.Add("2HU");
+            gestureComboBox.Items.Add("1HRUr");
+            gestureComboBox.Items.Add("1HRUl");
+            gestureComboBox.Items.Add("HTW");
+            gestureComboBox.Items.Add("HOH");
+            gestureComboBox.Items.Add("Wr");
+            gestureComboBox.Items.Add("Wl");
+            gestureComboBox.Items.Add("T");
+            gestureComboBox.Items.Add("PH");
+            gestureComboBox.Items.Add("HC");
+
+
         }
 
         private void resetAccumilators()
@@ -521,7 +538,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void register_btn_Click(object sender, RoutedEventArgs e)
         {
             string message = "";
-            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=DifferentGestures;Integrated Security=True;Pooling=False";
+            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDataset;Integrated Security=True;Pooling=False";
             this.frameCounter = 0;
             this.startClickedCounter = 5;
             try
@@ -531,6 +548,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                     conn.Open();
                     try {
                         this.username = username_txtbx.Text;
+                        this.gestureName = gestureComboBox.SelectedValue.ToString();
                         // System.Diagnostics.Debug.WriteLine(this.username);
                         using (SqlCommand command =
                             new SqlCommand("SELECT * FROM Users WHERE Users.User_Name =\'" + this.username + "\'", conn))
@@ -538,7 +556,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                             uniqueUsername = false;
                             using (SqlDataReader reader = command.ExecuteReader())
                             {
-                                if (!reader.Read())
+                                if (!reader.Read() && !(gestureName.Equals("") || gestureName==null))
                                 {
                                     uniqueUsername = true;
                                     register_btn.Visibility = Visibility.Hidden;
@@ -548,6 +566,18 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     enter_label.Visibility = Visibility.Visible;
                                     start_btn.Visibility = Visibility.Visible;
 
+                                }
+                            }
+                        }
+
+                        using (SqlCommand command =
+                            new SqlCommand("SELECT Id FROM Recognizable_Gestures WHERE Recognizable_Gestures.Gesture_Name =\'" + this.gestureName + "\'", conn))
+                        {
+                            using (SqlDataReader reader = command.ExecuteReader())
+                            {
+                                if(reader.Read())
+                                {
+                                    this.gestureId = Convert.ToInt32(reader["Id"].ToString());
                                 }
                             }
                         }
@@ -570,19 +600,19 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 reader1.Close();
                             }
 
-                            using (SqlCommand command1 = new SqlCommand
-                            ("Select * from Templates", conn))
-                            {
-                                using (SqlDataReader reader = command1.ExecuteReader())
-                                {
-                                    while (reader.Read())
-                                    {
-                                        MessageBox.Show(HelperMethods.ReaderToCSV(reader, false, " "));
-                                    }
+                            //using (SqlCommand command1 = new SqlCommand
+                            //("Select * from Templates", conn))
+                            //{
+                            //    using (SqlDataReader reader = command1.ExecuteReader())
+                            //    {
+                            //        while (reader.Read())
+                            //        {
+                            //            MessageBox.Show(HelperMethods.ReaderToCSV(reader, false, " "));
+                            //        }
 
-                                    reader.Close();
-                                }
-                            }
+                            //        reader.Close();
+                            //    }
+                            //}
                         }
                         catch (Exception ex0)
                         {
@@ -988,7 +1018,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=DifferentGestures;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDataset;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1021,7 +1051,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                             if (uniqueUsername && !this.username.Equals("")) 
                                             {
                                                 using (SqlCommand command = new SqlCommand
-                                                        ("INSERT INTO Extracted_Kinect_Data VALUES ( 1,'"
+                                                        ("INSERT INTO Extracted_Kinect_Data VALUES ('" + this.gestureId + "','" +
                                                         + this.userId + "','" + this.sessionId + "','" +
                                                         this.handLengthR * 100 + "','" + this.upperArmLengthR * 100 +
                                                         "','" + this.foreArmLengthR * 100 + "','" + this.shoulderLengthR * 100 +
@@ -1153,7 +1183,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                 }
 
                                                 using (SqlCommand command = new SqlCommand
-                                                        ("INSERT INTO Templates VALUES ( 1,'" + this.userId 
+                                                        ("INSERT INTO Templates VALUES ('"+ this.gestureId+ "','" + this.userId 
                                                         + "','" + this.handLengthRUserAcc / userRecords + "','" + this.upperArmLengthRUserAcc / userRecords + "','" +this.foreArmLengthRUserAcc/ userRecords + "','" + this.shoulderLengthRUserAcc / userRecords
                                                         + "','" + this.handLengthLUserAcc / userRecords + "','" + this.upperArmLengthLUserAcc / userRecords + "','" + this.foreArmLengthLUserAcc / userRecords + "','" + this.shoulderLengthLUserAcc / userRecords
                                                         + "','" + this.neckLengthUserAcc / userRecords + "','" + this.backboneLengthUserAcc / userRecords + "','" + this.lowerBackLengthUserAcc / userRecords + "','" + this.hipLengthRUserAcc / userRecords
@@ -1549,7 +1579,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=DifferentGestures;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDataset;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1644,7 +1674,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                 reader.Close();
                                             }
 
-                                            if (minError < 220)
+                                            if (minError < 200)
                                             {
                                                 using (SqlCommand command = new SqlCommand("SELECT * FROM Users WHERE Id=" + currentId, conn))
                                                 {
@@ -1686,6 +1716,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                     }
                 }
             }
-        }                        
+        }
+
+        private void gestureComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }
