@@ -570,19 +570,19 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 reader1.Close();
                             }
 
-                            using (SqlCommand command1 = new SqlCommand
-                            ("Select * from Templates", conn))
-                            {
-                                using (SqlDataReader reader = command1.ExecuteReader())
-                                {
-                                    while (reader.Read())
-                                    {
-                                        MessageBox.Show(HelperMethods.ReaderToCSV(reader, false, " "));
-                                    }
+                            //using (SqlCommand command1 = new SqlCommand
+                            //("Select * from Templates", conn))
+                            //{
+                            //    using (SqlDataReader reader = command1.ExecuteReader())
+                            //    {
+                            //        while (reader.Read())
+                            //        {
+                            //            MessageBox.Show(HelperMethods.ReaderToCSV(reader, false, " "));
+                            //        }
 
-                                    reader.Close();
-                                }
-                            }
+                            //        reader.Close();
+                            //    }
+                            //}
                         }
                         catch (Exception ex0)
                         {
@@ -957,8 +957,8 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     this.meanHWEAngleR = meanHWEAngleRAcc / frameCounter;
                                     this.meanWEShAngleL = meanWEShAngleLAcc / frameCounter;
                                     this.meanWEShAngleR = meanWEShAngleRAcc / frameCounter;
-                                    this.meanEShSAngleL = meanWEShAngleLAcc / frameCounter;
-                                    this.meanEShSAngleR = meanWEShAngleRAcc / frameCounter;
+                                    this.meanEShSAngleL = meanEShSAngleLAcc / frameCounter;
+                                    this.meanEShSAngleR = meanEShSAngleRAcc / frameCounter;
 
                                     this.elbowRelativeSpineShoulderRx = elbowRelativeSpineShoulderRxAcc / frameCounter;
                                     this.wristRelativeSpineShoulderRx = wristRelativeSpineShoulderRxAcc / frameCounter;
@@ -1132,7 +1132,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                         this.wristRelativeSpineShoulderRzUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Rz"].ToString());
                                                         this.elbowRelativeSpineShoulderRzUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Rz"].ToString());
                                                         this.wristRelativeSpineShoulderLzUserAcc += Convert.ToDouble(reader["Wrist_Relative_SpineShoulder_Lz"].ToString());
-                                                        this.elbowRelativeSpineShoulderLzUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Lx"].ToString());
+                                                        this.elbowRelativeSpineShoulderLzUserAcc += Convert.ToDouble(reader["Elbow_Relative_SpineShoulder_Lz"].ToString());
 
                                                         this.wristVelocityUserAccR += Convert.ToDouble(reader["Wrist_Velocity_R"].ToString());
                                                         this.handVelocityUserAccR += Convert.ToDouble(reader["Hand_Velocity_R"].ToString());
@@ -1659,7 +1659,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                             + "\n Wrist Velocity L:"
                                                             + this.wristVelocityL
                                                             + "\n Wrist Acceleration L:"
-                                                            + this.wristAccelerationL);
+                                                            + this.wristAccelerationL
+                                                            + "\n Shoulder Angle R:"
+                                                            + this.meanEShSAngleR
+                                                            + "\n Shoulder Angle L:"
+                                                            + this.meanEShSAngleL);
                                                     }
                                                     reader1.Close();
                                                 }
