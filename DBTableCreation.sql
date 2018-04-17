@@ -147,3 +147,39 @@ CREATE TABLE [dbo].[Templates] (
     FOREIGN KEY ([User_Id]) REFERENCES [dbo].[Users] ([Id])
 );
 
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("1HUr");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("1HUl");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("1HU");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("1HRUr");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("1HRUl");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("HTW");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("HOH");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("Wr");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("Wl");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("T");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("PH");
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ("HC");
+

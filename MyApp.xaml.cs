@@ -288,6 +288,20 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             enter_label.Visibility = Visibility.Hidden;
             notRegistered_btn.Visibility = Visibility.Hidden;
             start_btn.Visibility = Visibility.Hidden;
+
+
+            gestureComboBox.Items.Add("1HUr");
+            gestureComboBox.Items.Add("1HUl");
+            gestureComboBox.Items.Add("2HU");
+            gestureComboBox.Items.Add("1HRUr");
+            gestureComboBox.Items.Add("1HRUl");
+            gestureComboBox.Items.Add("HTW");
+            gestureComboBox.Items.Add("HOH");
+            gestureComboBox.Items.Add("Wr");
+            gestureComboBox.Items.Add("Wl");
+            gestureComboBox.Items.Add("T");
+            gestureComboBox.Items.Add("PH");
+            gestureComboBox.Items.Add("HC");
         }
 
         private void resetAccumilators()
@@ -1690,6 +1704,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                     }
                 }
             }
-        }                        
+        }
+
+        private void gestureComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }
