@@ -263,7 +263,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         int frameCounter = 0;
         bool startClicked = false;
         bool signInStartClicked = false;
-        int startClickedCounter = 5;
+        int startClickedCounter = 10;
 
         //velocity attributes
         CameraSpacePoint oldWristPosR;
@@ -538,7 +538,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             string message = "";
             string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDataset;Integrated Security=True;Pooling=False";
             this.frameCounter = 0;
-            this.startClickedCounter = 5;
+            this.startClickedCounter = 10;
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -560,6 +560,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     register_btn.Visibility = Visibility.Hidden;
                                     username_txtbx.Visibility = Visibility.Hidden;
                                     register_label.Visibility = Visibility.Hidden;
+                                    gestureComboBox.Visibility = Visibility.Hidden;
                                     signIn_btn.Visibility = Visibility.Hidden;
                                     enter_label.Visibility = Visibility.Visible;
                                     start_btn.Visibility = Visibility.Visible;
@@ -672,6 +673,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             register_btn.Visibility = Visibility.Hidden;
             username_txtbx.Visibility = Visibility.Hidden;
             register_label.Visibility = Visibility.Hidden;
+            gestureComboBox.Visibility = Visibility.Hidden;
             signIn_btn.Visibility = Visibility.Hidden;
             enter_label.Visibility = Visibility.Visible;
             notRegistered_btn.Visibility = Visibility.Visible;
@@ -683,6 +685,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             register_btn.Visibility = Visibility.Visible;
             username_txtbx.Visibility = Visibility.Visible;
             register_label.Visibility = Visibility.Visible;
+            gestureComboBox.Visibility = Visibility.Visible;
             signIn_btn.Visibility = Visibility.Visible;
             enter_label.Visibility = Visibility.Hidden;
             notRegistered_btn.Visibility = Visibility.Hidden;
@@ -1094,7 +1097,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                     SqlDataReader reader = command.ExecuteReader();
                                                     reader.Close();
                                                 }
-
                                             }
                                             conn.Close();
                                         }
@@ -1180,6 +1182,19 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                     
                                                 }
 
+                                                using (SqlCommand command2 = new SqlCommand
+                                                ("SELECT *" + "FROM Extracted_Kinect_Data " + "WHERE User_Id=" + this.userId, conn))
+                                                {
+                                                    using (SqlDataReader reader2 = command2.ExecuteReader())
+                                                    {
+                                                        while (reader2.Read())
+                                                        {
+                                                            System.IO.File.AppendAllText("C:\\Users\\Nadeen\\Documents\\Visual Studio 2015\\Projects\\DiscreteGestureBasics-WPF\\KinectDataset.csv", HelperMethods.EKDtblReaderToCSV(reader, true, ","));
+                                                        }
+                                                        reader2.Close();
+                                                    }
+                                                }
+
                                                 using (SqlCommand command = new SqlCommand
                                                         ("INSERT INTO Templates VALUES ('"+ this.gestureId+ "','" + this.userId 
                                                         + "','" + this.handLengthRUserAcc / userRecords + "','" + this.upperArmLengthRUserAcc / userRecords + "','" +this.foreArmLengthRUserAcc/ userRecords + "','" + this.shoulderLengthRUserAcc / userRecords
@@ -1226,6 +1241,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                             register_btn.Visibility = Visibility.Visible;
                                             username_txtbx.Visibility = Visibility.Visible;
                                             register_label.Visibility = Visibility.Visible;
+                                            gestureComboBox.Visibility = Visibility.Visible;
                                             signIn_btn.Visibility = Visibility.Visible;
                                             enter_label.Visibility = Visibility.Hidden;
                                             start_btn.Visibility = Visibility.Hidden;
