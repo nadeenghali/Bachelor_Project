@@ -30,7 +30,9 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private BodyFrameReader bodyFrameReader1 = null;
         private string statusText = null;
         private KinectBodyView kinectBodyView = null;
-        
+        bool train = false;
+        bool register = false;
+
         //DB data
         int userId;
         string username = "";
@@ -303,7 +305,50 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             gestureComboBox.Items.Add("T");
             gestureComboBox.Items.Add("PH");
             gestureComboBox.Items.Add("HC");
+
+            //string connectionString = null;
+            //connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
+            //using (SqlConnection conn = new SqlConnection(connectionString))
+            //{
+            //    conn.Open();
+            //    using (SqlCommand command2 = new SqlCommand
+            //                                    ("SELECT * FROM Extracted_Kinect_Data", conn))
+            //    {
+            //        using (SqlDataReader reader2 = command2.ExecuteReader())
+            //        {
+            //            do
+            //            {
+            //                System.IO.File.AppendAllText("C:\\Users\\Nadeen\\Documents\\Visual Studio 2015\\Projects\\DiscreteGestureBasics-WPF\\KinectDataset.csv", HelperMethods.EKDtblReaderToCSV(reader2, false, ","));
+            //            }
+            //            while (!reader2.IsClosed && reader2.Read());
+            //            reader2.Close();
+            //            conn.Close();
+            //        }
+            //    }
+            //}
+            
+            //connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase1;Integrated Security=True;Pooling=False";
+            //using (SqlConnection conn = new SqlConnection(connectionString))
+            //{
+            //    conn.Open();
+            //    using (SqlCommand command2 = new SqlCommand
+            //                                    ("SELECT * FROM Extracted_Kinect_Data", conn))
+            //    {
+            //        using (SqlDataReader reader2 = command2.ExecuteReader())
+            //        {
+            //            do
+            //            {
+            //                System.IO.File.AppendAllText("C:\\Users\\Nadeen\\Documents\\Visual Studio 2015\\Projects\\DiscreteGestureBasics-WPF\\KinectDataset.csv", HelperMethods.EKDtblReaderToCSV(reader2, false, ","));
+            //            }
+            //            while (!reader2.IsClosed && reader2.Read());
+            //            reader2.Close();
+            //            conn.Close();
+            //        }
+            //    }
+            //}
+
         }
+
 
         private void resetAccumilators()
         {
@@ -536,9 +581,11 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void register_btn_Click(object sender, RoutedEventArgs e)
         {
             string message = "";
-            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDataset;Integrated Security=True;Pooling=False";
+            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
             this.frameCounter = 0;
             this.startClickedCounter = 10;
+            train = false;
+            register = true;
             try
             {
                 using (SqlConnection conn = new SqlConnection(connectionString))
@@ -1019,7 +1066,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDataset;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1182,19 +1229,6 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                     
                                                 }
 
-                                                using (SqlCommand command2 = new SqlCommand
-                                                ("SELECT *" + "FROM Extracted_Kinect_Data " + "WHERE User_Id=" + this.userId, conn))
-                                                {
-                                                    using (SqlDataReader reader2 = command2.ExecuteReader())
-                                                    {
-                                                        while (reader2.Read())
-                                                        {
-                                                            System.IO.File.AppendAllText("C:\\Users\\Nadeen\\Documents\\Visual Studio 2015\\Projects\\DiscreteGestureBasics-WPF\\KinectDataset.csv", HelperMethods.EKDtblReaderToCSV(reader, true, ","));
-                                                        }
-                                                        reader2.Close();
-                                                    }
-                                                }
-
                                                 using (SqlCommand command = new SqlCommand
                                                         ("INSERT INTO Templates VALUES ('"+ this.gestureId+ "','" + this.userId 
                                                         + "','" + this.handLengthRUserAcc / userRecords + "','" + this.upperArmLengthRUserAcc / userRecords + "','" +this.foreArmLengthRUserAcc/ userRecords + "','" + this.shoulderLengthRUserAcc / userRecords
@@ -1231,6 +1265,20 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                 {
                                                     SqlDataReader reader1 = command.ExecuteReader();
                                                     reader1.Close();
+                                                }
+
+                                                using (SqlCommand command2 = new SqlCommand
+                                                ("SELECT * FROM Extracted_Kinect_Data WHERE User_Id=" + this.userId, conn))
+                                                {
+                                                    using (SqlDataReader reader2 = command2.ExecuteReader())
+                                                    {
+                                                        do
+                                                        {
+                                                            System.IO.File.AppendAllText("C:\\Users\\Nadeen\\Documents\\Visual Studio 2015\\Projects\\DiscreteGestureBasics-WPF\\KinectDataset.csv", HelperMethods.EKDtblReaderToCSV(reader2, false, ","));
+                                                        }
+                                                        while (!reader2.IsClosed && reader2.Read());
+                                                        reader2.Close();
+                                                    }
                                                 }
                                                 reader.Close();
                                                 conn.Close();
@@ -1593,7 +1641,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDataset;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1736,6 +1784,116 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             }
         }
 
+        private void train_btn_Click(object sender, RoutedEventArgs e)
+        {
+            string message = "";
+            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
+            this.frameCounter = 0;
+            this.startClickedCounter = 5;
+            train = true;
+            register = false;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection(connectionString))
+                {
+                    conn.Open();
+                    try
+                    {
+                        this.username = username_txtbx.Text;
+                        this.gestureName = gestureComboBox.SelectedValue.ToString();
+                        // System.Diagnostics.Debug.WriteLine(this.username);
+                        using (SqlCommand command =
+                            new SqlCommand("SELECT * FROM Users WHERE Users.User_Name =\'" + this.username + "\'", conn))
+                        {
+                            uniqueUsername = false;
+                            using (SqlDataReader reader = command.ExecuteReader())
+                            {
+                                if (!reader.Read() && !(gestureName.Equals("") || gestureName == null))
+                                {
+                                    uniqueUsername = true;
+                                    register_btn.Visibility = Visibility.Hidden;
+                                    username_txtbx.Visibility = Visibility.Hidden;
+                                    register_label.Visibility = Visibility.Hidden;
+                                    gestureComboBox.Visibility = Visibility.Hidden;
+                                    signIn_btn.Visibility = Visibility.Hidden;
+                                    enter_label.Visibility = Visibility.Visible;
+                                    start_btn.Visibility = Visibility.Visible;
+
+                                }
+                            }
+                        }
+
+                        using (SqlCommand command =
+                            new SqlCommand("SELECT Id FROM Recognizable_Gestures WHERE Recognizable_Gestures.Gesture_Name =\'" + this.gestureName + "\'", conn))
+                        {
+                            using (SqlDataReader reader = command.ExecuteReader())
+                            {
+                                if (reader.Read())
+                                {
+                                    this.gestureId = Convert.ToInt32(reader["Id"].ToString());
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex1)
+                    {
+                        message += "Could not validate username! \n" + ex1.ToString();
+                    }
+
+
+                    if (!uniqueUsername)
+                    {
+                        message += "Valid Username \n";
+
+                        try
+                        {
+                            using (SqlCommand command =
+                                new SqlCommand("SELECT * FROM Users WHERE Users.User_Name =\'" + this.username + "\'", conn))
+                            {
+                                using (SqlDataReader reader = command.ExecuteReader())
+                                {
+                                    reader.Read();
+                                    this.userId = Convert.ToInt32(reader["Id"].ToString());
+                                }
+                            }
+
+                            using (SqlCommand command2 =
+                                new SqlCommand("INSERT INTO Sessions VALUES ('" + this.userId + "')", conn))
+                            {
+                                SqlDataReader reader2 = command2.ExecuteReader();
+                                reader2.Close();
+                            }
+                            using (SqlCommand command =
+                                new SqlCommand("SELECT Top 1 * FROM Sessions WHERE Sessions.User_Id =\'" + this.userId + "\' ORDER BY Sessions.Id DESC", conn))
+                            {
+                                using (SqlDataReader reader = command.ExecuteReader())
+                                {
+                                    reader.Read();
+                                    this.sessionId = Convert.ToInt32(reader["Id"].ToString());
+                                }
+                            }
+                        }
+                        catch (Exception ex3)
+                        {
+                            message += "Could not create session!" + ex3.ToString();
+                        }
+
+                    }
+                    else
+                    {
+                        message += "User does not exist!";
+                    }
+
+                    conn.Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                message += "Oops database connection failed! -" + ex.ToString();
+            }
+
+            MessageBox.Show(message);
+        }
         private void gestureComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 

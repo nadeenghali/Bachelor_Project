@@ -148,38 +148,38 @@ CREATE TABLE [dbo].[Templates] (
 );
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("1HUr");
+VALUES ('1HUr');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("1HUl");
+VALUES ('1HUl');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("1HU");
+VALUES ('1HU');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("1HRUr");
+VALUES ('1HRUr');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("1HRUl");
+VALUES ('1HRUl');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("HTW");
+VALUES ('HTW');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("HOH");
+VALUES ('HOH');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("Wr");
+VALUES ('Wr');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("Wl");
+VALUES ('Wl');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("T");
+VALUES ('T');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("PH");
+VALUES ('PH');
 
 INSERT INTO Recognizable_Gestures (Gesture_Name)
-VALUES ("HC");
+VALUES ('HC');
 

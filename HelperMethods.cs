@@ -56,7 +56,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             return result;
         }
 
-        public static double getAngleAtMiddleJoint(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
+        public static double getAngleAtMiddleJoint180(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
         {
             double result = 0;
             Vector3D v = new Vector3D(b.X - a.X, b.Y - a.Y, b.Z - a.Z);
@@ -66,8 +66,24 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             return result;
         }
 
-        public static string ReaderToLibSVMCSV(IDataReader dataReader, bool includeHeaderAsFirstRow = false,
-            string separator = ",")
+        public static double getAngleAtMiddleJoint(CameraSpacePoint a, CameraSpacePoint b, CameraSpacePoint c)
+        {
+            double result = 0;
+            Vector3D v = new Vector3D(b.X - a.X, b.Y - a.Y, b.Z - a.Z);
+            Vector3D u = new Vector3D(b.X - c.X, b.Y - c.Y, b.Z - c.Z);
+            double dot = Vector3D.DotProduct(v, u);
+            double vMag = Math.Sqrt(Math.Pow(v.X, 2) + Math.Pow(v.Y, 2) + Math.Pow(v.Z, 2));
+            double uMag = Math.Sqrt(Math.Pow(u.X, 2) + Math.Pow(u.Y, 2) + Math.Pow(u.Z, 2));
+
+            double uvMult = uMag * vMag;
+            double cosRes = dot / uvMult;
+
+            result = (Math.Acos(cosRes)*180)/Math.PI;
+            return result;
+        }
+
+        public static string ReaderToLibSVMCSV(IDataReader dataReader, bool includeHeaderAsFirstRow = true,
+            string separator = " ")
         {
             DataTable dataTable = new DataTable();
             StringBuilder csvRows = new StringBuilder();
@@ -95,7 +111,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 {
                     row = "";
                     //Row
-                    for (int index = 0; index < columns - 1; index++)
+                    for (int index = 2; index < columns - 1; index++)
                     {
                         string value = dataTable.Rows[rowIndex][index].ToString();
 
@@ -120,15 +136,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 value = value.Replace("\n", "");
                             }
                         }
-                        if (index > 2)
+                        if (index > 2 && index != 3)
                         {
-                            row += (index-2) + ":" + value;
+                            row += (index-3) + ":" + value;
                         }
-                        else if(index == 2)
+                        else if(index == 2 && index != 3)
                         {
                             row += value;
                         }
-                        if (index < columns - 1 && index >= 2)
+                        if (index < columns - 1 && index >= 2 && index != 3)
                             row += separator;
                     }
                     dataTable.Rows[rowIndex][columns - 1].ToString().ToString().Replace(separator, " ");
@@ -176,7 +192,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                 {
                     row = "";
                     //Row
-                    for (int index = 0; index < columns - 1; index++)
+                    for (int index = 0; index < columns ; index++)
                     {
                         string value = dataTable.Rows[rowIndex][index].ToString();
 
@@ -206,15 +222,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                             row += value;
                         }
 
-                        if (index < columns - 1 && index > 3)
+                        if (index < columns && index > 3)
                             row += separator;
 
-                        if(index == columns-2)
+                        if(index == columns-1)
                         {
                             row += dataTable.Rows[rowIndex][2].ToString();
                         }
                     }
-                    dataTable.Rows[rowIndex][columns - 1].ToString().ToString().Replace(separator, " ");
+                    //dataTable.Rows[rowIndex][columns - 1].ToString().ToString().Replace(separator, " ");
                     row += Environment.NewLine;
                     csvRows.Append(row);
                 }
