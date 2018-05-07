@@ -307,7 +307,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             gestureComboBox.Items.Add("HC");
 
             //string connectionString = null;
-            //connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
+            //connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabaseForTen;Integrated Security=True;Pooling=False";
             //using (SqlConnection conn = new SqlConnection(connectionString))
             //{
             //    conn.Open();
@@ -326,7 +326,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             //        }
             //    }
             //}
-            
+
             //connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase1;Integrated Security=True;Pooling=False";
             //using (SqlConnection conn = new SqlConnection(connectionString))
             //{
@@ -581,7 +581,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void register_btn_Click(object sender, RoutedEventArgs e)
         {
             string message = "";
-            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
+            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabaseForTen;Integrated Security=True;Pooling=False";
             this.frameCounter = 0;
             this.startClickedCounter = 10;
             train = false;
@@ -605,6 +605,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                 {
                                     uniqueUsername = true;
                                     register_btn.Visibility = Visibility.Hidden;
+                                    train_btn.Visibility = Visibility.Hidden;
                                     username_txtbx.Visibility = Visibility.Hidden;
                                     register_label.Visibility = Visibility.Hidden;
                                     gestureComboBox.Visibility = Visibility.Hidden;
@@ -718,6 +719,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void signIn_btn_Click(object sender, RoutedEventArgs e)
         {
             register_btn.Visibility = Visibility.Hidden;
+            train_btn.Visibility = Visibility.Hidden;
             username_txtbx.Visibility = Visibility.Hidden;
             register_label.Visibility = Visibility.Hidden;
             gestureComboBox.Visibility = Visibility.Hidden;
@@ -730,6 +732,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void notRegistered_btn_Click(object sender, RoutedEventArgs e)
         {
             register_btn.Visibility = Visibility.Visible;
+            train_btn.Visibility = Visibility.Visible;
             username_txtbx.Visibility = Visibility.Visible;
             register_label.Visibility = Visibility.Visible;
             gestureComboBox.Visibility = Visibility.Visible;
@@ -1066,7 +1069,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabaseForTen;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1268,7 +1271,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                 }
 
                                                 using (SqlCommand command2 = new SqlCommand
-                                                ("SELECT * FROM Extracted_Kinect_Data WHERE User_Id=" + this.userId, conn))
+                                                ("SELECT * FROM Extracted_Kinect_Data WHERE User_Id=" + this.userId + "AND Session_Id=" + this.sessionId, conn))
                                                 {
                                                     using (SqlDataReader reader2 = command2.ExecuteReader())
                                                     {
@@ -1283,10 +1286,18 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                 reader.Close();
                                                 conn.Close();
                                             }
-                                            message = "Registered Successfully! \n";
+                                            if (register)
+                                            {
+                                                message = "Registered Successfully! \n";
+                                            }
+                                            else if(train)
+                                            {
+                                                message = "Trained Successfully! \n";
+                                            }
                                             this.username = "";
                                             this.uniqueUsername = false;
                                             register_btn.Visibility = Visibility.Visible;
+                                            train_btn.Visibility = Visibility.Visible;
                                             username_txtbx.Visibility = Visibility.Visible;
                                             register_label.Visibility = Visibility.Visible;
                                             gestureComboBox.Visibility = Visibility.Visible;
@@ -1641,7 +1652,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                     resetAccumilators();
 
                                     string connectionString = null;
-                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
+                                    connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabaseForTen;Integrated Security=True;Pooling=False";
                                     try
                                     {
 
@@ -1734,6 +1745,59 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
 
                                                 }
                                                 reader.Close();
+
+                                                using (SqlCommand command1 = new SqlCommand
+                                                       ("INSERT INTO SignInAttempts VALUES ('" + this.handLengthR * 100 + "','" + this.upperArmLengthR * 100 +
+                                                       "','" + this.foreArmLengthR * 100 + "','" + this.shoulderLengthR * 100 +
+                                                       "','" + this.handLengthL * 100 + "','" + this.upperArmLengthL * 100 +
+                                                       "','" + this.foreArmLengthL * 100 + "','" + this.shoulderLengthL * 100 +
+                                                       "','" + this.neckLength * 100 + "','" + this.backboneLength * 100 +
+                                                       "','" + this.lowerBackLength * 100 + "','" + this.hipLengthR * 100 +
+                                                       "','" + this.upperLegLengthR * 100 + "','" + this.shinLengthR * 100 +
+                                                       "','" + this.footLengthR * 100 + "','" + this.hipLengthL * 100 +
+                                                       "','" + this.upperLegLengthL * 100 + "','" + this.shinLengthL * 100 +
+                                                       "','" + this.footLengthL * 100 + "','" + this.minHWEAngleR +
+                                                       "','" + this.meanHWEAngleR + "','" + this.maxHWEAngleR +
+                                                       "','" + this.minWEShAngleR + "','" + this.meanWEShAngleR +
+                                                       "','" + this.maxWEShAngleR +
+                                                       "','" + this.minEShSAngleR + "','" + this.meanEShSAngleR +
+                                                       "','" + this.maxEShSAngleR +
+                                                       "','" + this.minHWEAngleL + "','" + this.meanHWEAngleL +
+                                                       "','" + this.maxHWEAngleL +
+                                                       "','" + this.minWEShAngleL + "','" + this.meanWEShAngleL +
+                                                       "','" + this.maxWEShAngleL +
+                                                       "','" + this.minEShSAngleL + "','" + this.meanEShSAngleL +
+                                                       "','" + this.maxEShSAngleL +
+                                                       "','" + this.wristRelativeSpineShoulderRx * 100 +
+                                                       "','" + this.elbowRelativeSpineShoulderRx * 100 +
+                                                       "','" + this.wristRelativeSpineShoulderLx * 100 +
+                                                       "','" + this.elbowRelativeSpineShoulderLx * 100 +
+                                                       "','" + this.wristRelativeSpineShoulderRy * 100 +
+                                                       "','" + this.elbowRelativeSpineShoulderRy * 100 +
+                                                       "','" + this.wristRelativeSpineShoulderLy * 100 +
+                                                       "','" + this.elbowRelativeSpineShoulderLy * 100 +
+                                                       "','" + this.wristRelativeSpineShoulderRz * 100 +
+                                                       "','" + this.elbowRelativeSpineShoulderRz * 100 +
+                                                       "','" + this.wristRelativeSpineShoulderLz * 100 +
+                                                       "','" + this.elbowRelativeSpineShoulderLz * 100 +
+                                                       "','" + this.wristVelocityR +
+                                                       "','" + this.handVelocityR +
+                                                       "','" + this.wristVelocityL +
+                                                       "','" + this.handVelocityL +
+                                                       "','" + this.wristAccelerationR +
+                                                       "','" + this.wristAccelerationL + "')", conn))
+                                                {
+                                                    SqlDataReader reader2 = command1.ExecuteReader();
+                                                    reader2.Close();
+                                                }
+
+                                                using (SqlCommand command3 = new SqlCommand("SELECT Top 1 * FROM SignInAttempts ORDER BY SignInAttempts.Id DESC", conn))
+                                                {
+                                                    using (SqlDataReader reader3 = command3.ExecuteReader())
+                                                    {
+                                                        System.IO.File.AppendAllText("C:\\Users\\Nadeen\\Documents\\Visual Studio 2015\\Projects\\DiscreteGestureBasics-WPF\\KinectDatasetSignInAttempts.csv", HelperMethods.SIAtblReaderToCSV(reader3, false, ","));
+                                                    }
+                                                }
                                             }
 
                                             if (minError < 200)
@@ -1787,7 +1851,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
         private void train_btn_Click(object sender, RoutedEventArgs e)
         {
             string message = "";
-            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabase;Integrated Security=True;Pooling=False";
+            string connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabaseForTen;Integrated Security=True;Pooling=False";
             this.frameCounter = 0;
             this.startClickedCounter = 5;
             train = true;
@@ -1805,13 +1869,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                         using (SqlCommand command =
                             new SqlCommand("SELECT * FROM Users WHERE Users.User_Name =\'" + this.username + "\'", conn))
                         {
-                            uniqueUsername = false;
+                            uniqueUsername = true;
                             using (SqlDataReader reader = command.ExecuteReader())
                             {
-                                if (!reader.Read() && !(gestureName.Equals("") || gestureName == null))
+                                if (reader.Read())
                                 {
-                                    uniqueUsername = true;
+                                    //uniqueUsername = true;
+                                    uniqueUsername = false;
                                     register_btn.Visibility = Visibility.Hidden;
+                                    train_btn.Visibility = Visibility.Hidden;
                                     username_txtbx.Visibility = Visibility.Hidden;
                                     register_label.Visibility = Visibility.Hidden;
                                     gestureComboBox.Visibility = Visibility.Hidden;

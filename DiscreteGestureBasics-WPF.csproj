@@ -177,8 +177,10 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="KinectDatasetSignInAttempts.csv" />
     <None Include="KinectDatasetTest.csv" />
     <None Include="KinectDataset.csv" />
+    <None Include="KinectDatasettst.csv" />
     <None Include="LIBSVM_COPYRIGHT" />
     <None Include="LibSVM_CSV.csv" />
     <None Include="packages.config" />
