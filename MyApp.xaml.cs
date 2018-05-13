@@ -306,6 +306,15 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
             gestureComboBox.Items.Add("PH");
             gestureComboBox.Items.Add("HC");
 
+            gestureComboBox.Items.Add("Dab");
+            gestureComboBox.Items.Add("/");
+            gestureComboBox.Items.Add("\\");
+            gestureComboBox.Items.Add("2HRU");
+            gestureComboBox.Items.Add("HTr");
+            gestureComboBox.Items.Add("HTl");
+            gestureComboBox.Items.Add("HOHr");
+            gestureComboBox.Items.Add("HOHl");
+
             //string connectionString = null;
             //connectionString = "Data Source=NADEENS-PC\\SQLEXPRESS;Initial Catalog=KinectDatabaseForTen;Integrated Security=True;Pooling=False";
             //using (SqlConnection conn = new SqlConnection(connectionString))
