@@ -181,6 +181,7 @@
     <None Include="KinectDatasetTest.csv" />
     <None Include="KinectDataset.csv" />
     <None Include="KinectDatasettst.csv" />
+    <None Include="LabeledSignInAttempts.csv" />
     <None Include="LIBSVM_COPYRIGHT" />
     <None Include="LibSVM_CSV.csv" />
     <None Include="packages.config" />

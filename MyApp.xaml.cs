@@ -1804,7 +1804,7 @@ namespace Microsoft.Samples.Kinect.DiscreteGestureBasics
                                                 {
                                                     using (SqlDataReader reader3 = command3.ExecuteReader())
                                                     {
-                                                        System.IO.File.AppendAllText("C:\\Users\\Nadeen\\Documents\\Visual Studio 2015\\Projects\\DiscreteGestureBasics-WPF\\KinectDatasetSignInAttempts.csv", HelperMethods.SIAtblReaderToCSV(reader3, false, ","));
+                                                        System.IO.File.AppendAllText("C:\\Users\\Nadeen\\Documents\\Visual Studio 2015\\Projects\\DiscreteGestureBasics-WPF\\LabeledSignInAttempts.csv", HelperMethods.SIAtblReaderToCSV(reader3, false, ","));
                                                     }
                                                 }
                                             }
