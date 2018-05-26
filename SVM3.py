@@ -25,7 +25,7 @@ from sklearn.multiclass import OneVsRestClassifier
 # params = {'C': scipy.stats.expon(scale=100),'gamma': scipy.stats.expon(scale=0.1),
 # 'kernel': ['rbf'], 'class_weight':['balanced', None]}
 
-param_grid = [{'C':[0.1,0.5,1,5,10,15,100,1000], 'kernel': ['rbf'], 'gamma': [0.018,0.0001,0.001,0.01,0.1,1]}]
+# param_grid = [{'C':[0.1,0.5,1,5,10,15,100,1000], 'kernel': ['rbf'], 'gamma': [0.001,0.005,0.01,0.05,0.1,1]}]
 
 # Importing the dataset
 dataset = pd.read_csv('KinectDataset.csv')
@@ -41,8 +41,8 @@ X_test = datasettst.iloc[:, 0:55].values
 y_test = datasettst.iloc[:, 55].values
 
 
-datasetpred = pd.read_csv('KinectDatasetSignInAttempts.csv')
-X_testpred = datasetpred.iloc[:, 0:55].values
+# datasetpred = pd.read_csv('KinectDatasetSignInAttempts.csv')
+# X_testpred = datasetpred.iloc[:, 0:55].values
 
 # Feature Scaling.
 from sklearn.preprocessing import StandardScaler
@@ -51,17 +51,17 @@ X_train = sc.fit_transform(X_train)
 X_test = sc.fit_transform(X_test)
 # X_testpred = sc.fit_transform(X_testpred)
 
+# svmm= GridSearchCV(SVC(),param_grid,cv=4)
+# # svmm= RandomizedSearchCV(SVC(),params,cv=4,scoring='f1_macro')
+# svmm.fit(X_train,y_train)
+# print(svmm.best_params_)
 
 svm= SVC(probability=True, C=5, gamma=0.01)
 svm.fit(X_train,y_train)
 
-# svmm= GridSearchCV(SVC(),param_grid,cv=4)
-# svmm= RandomizedSearchCV(SVC(),params,cv=4,scoring='f1_macro')
-# svmm.fit(X_train,y_train)
-# print(svmm.best_params_)
 
 #create the Cross validation object
-loo = LeaveOneOut()
+# loo = LeaveOneOut()
 
 # calculate cross validated accuracy score
 scoresKfoldTrain = cross_val_score(svm, X_train, y_train, cv = 2)
@@ -116,9 +116,9 @@ print(predictions)
 probaz = svm.predict_proba(X_test)
 count = 0
 
-while (len(probaz)-1>count):
-	print(max(svm.predict_proba(X_test)[count]))
-	count = count + 1
+# while (len(probaz)-1>count):
+# 	print(max(svm.predict_proba(X_test)[count]))
+# 	count = count + 1
 
 print(float(svm.predict_proba(X_test)[len(X_test)-1][predictions[len(predictions)-1]-2]))
 
