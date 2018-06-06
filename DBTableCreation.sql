@@ -243,3 +243,26 @@ VALUES ('PH');
 INSERT INTO Recognizable_Gestures (Gesture_Name)
 VALUES ('HC');
 
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ('Dab');
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ('\');
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ('/');
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ('2HRU');
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ('HTr');
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ('HTl');
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ('HOHr');
+
+INSERT INTO Recognizable_Gestures (Gesture_Name)
+VALUES ('HOHl');

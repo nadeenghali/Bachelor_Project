@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("database/seated.gbd")]
+[assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("dbtablecreation.sql")]
 [assembly: System.Windows.Resources.AssemblyAssociatedContentFileAttribute("libsvm.dll")]
 
 
