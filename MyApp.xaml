@@ -7,14 +7,16 @@
         mc:Ignorable="d"
         Title="MyApp" Height="300" Width="300">
     <Grid>
-        <TextBox x:Name="username_txtbx" HorizontalAlignment="Left" Height="23" Margin="81,80,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="username_txtbx_TextChanged" GotKeyboardFocus="username_txtbx_GotKeyboardFocus" Text="Username"/>
+        <TextBox x:Name="username_txtbx" HorizontalAlignment="Left" Height="23" Margin="81,58,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="username_txtbx_TextChanged" GotKeyboardFocus="username_txtbx_GotKeyboardFocus" Text="Username"/>
         <Button x:Name="register_btn" Content="Register" HorizontalAlignment="Left" Margin="81,123,0,0" VerticalAlignment="Top" Width="75" Click="register_btn_Click"/>
         <Button x:Name="signIn_btn" Content="Already Registered" HorizontalAlignment="Left" Margin="81,225,0,0" VerticalAlignment="Top" Width="120" Click="signIn_btn_Click"/>
-        <Label x:Name="register_label" Content="Register" HorizontalAlignment="Left" Margin="81,29,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"/>
+        <Label x:Name="register_label" Content="Register/Train" HorizontalAlignment="Left" Margin="81,22,0,0" VerticalAlignment="Top" FontSize="16" FontWeight="Bold"/>
         <Label x:Name="enter_label" Content="Enter Gesture" HorizontalAlignment="Left" Margin="84,103,0,0" VerticalAlignment="Top" FontSize="18" FontWeight="Bold"/>
         <Button x:Name="notRegistered_btn" Content="Not Registered" HorizontalAlignment="Left" Margin="81,206,0,0" VerticalAlignment="Top" Width="120" Click="notRegistered_btn_Click"/>
         <Button x:Name="start_btn" Content="Start" HorizontalAlignment="Left" Margin="107,162,0,0" VerticalAlignment="Top" Width="75" Click="start_btn_Click"/>
         <Button x:Name="signInStart_btn" Content="Sign In" HorizontalAlignment="Left" Margin="107,183,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="-0.156,0.586" Click="signInStart_btn_Click" Visibility="Hidden"/>
+        <ComboBox x:Name="gestureComboBox" HorizontalAlignment="Left" Margin="81,86,0,0" VerticalAlignment="Top" Width="74" SelectionChanged="gestureComboBox_SelectionChanged"/>
+        <Button x:Name="train_btn" Content="Train" HorizontalAlignment="Left" Margin="81,142,0,0" VerticalAlignment="Top" Width="75" Click="train_btn_Click"/>
 
     </Grid>
 </Window>
